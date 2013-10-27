@@ -1,17 +1,31 @@
 #include <iostream>
+#include <boost/smart_ptr.hpp>
 #include "point3.h"
 #include "vector3.h"
 #include "ray.h"
+#include "scene.h"
+#include "tracer.h"
 
 using namespace std;
 
-void testVector();
+
 
 int main()
 {
-	testVector();
+	boost::shared_ptr<Scene> scene(new Scene);
+	scene->renderScene();
+	// testVector();
 	cout << "Hello RayTracer!" << endl;
 	return 0;
+}
+
+/**
+ * @brief buildScene
+ * build the scene for rendering
+ */
+void buildScene()
+{
+
 }
 
 /**

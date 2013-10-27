@@ -25,6 +25,11 @@ Ray& Ray::operator =(const Ray &r)
 	d = r.d;
 }
 
+void Ray::normalize()
+{
+	d.normalize();
+}
+
 std::string Ray::toString() const
 {
 	std::ostringstream strs;

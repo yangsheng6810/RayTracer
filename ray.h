@@ -12,6 +12,7 @@ public:
 	Ray(const Point3& oo, const Vector3& dd);
 	Ray(const Ray& r);
 	Ray& operator = (const Ray& r);
+	void normalize();
     std::string toString() const;
 
 	Point3 o;
