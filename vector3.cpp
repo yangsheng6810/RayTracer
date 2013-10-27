@@ -15,7 +15,7 @@ Vector3::Vector3(const Vector3& v)
 	z = v.z;
 }
 
-Vector3::Vector3(double xx, double yy, double zz)
+Vector3::Vector3(float xx, float yy, float zz)
 {
 	x = xx;
 	y = yy;
@@ -65,12 +65,12 @@ Vector3& Vector3::operator *=(const Vector3& v)
 	return *this;
 }
 
-Vector3 Vector3::operator *(const double& f) const
+Vector3 Vector3::operator *(const float& f) const
 {
 	return Vector3(f * x, f * y, f * z);
 }
 
-Vector3& Vector3::operator *=(const double& f)
+Vector3& Vector3::operator *=(const float& f)
 {
 	x *= f;
 	y *= f;
@@ -85,9 +85,9 @@ Vector3& Vector3::operator =(const Vector3& v)
 	z = v.z;
 }
 
-double Vector3::dot(const Vector3& v) const
+float Vector3::dot(const Vector3& v) const
 {
-	return (double)x * v.x + y * v.y + z * v.z;
+	return (float)x * v.x + y * v.y + z * v.z;
 }
 
 Vector3 Vector3::tensor(const Vector3& v) const
@@ -98,13 +98,7 @@ Vector3 Vector3::tensor(const Vector3& v) const
 std::string Vector3::toString() const
 {
 	std::ostringstream strs;
-	strs<<"vector = ("<<x<<", "<<y<<", "<<z<<")"<<std::endl;
+	strs<<"("<<x<<", "<<y<<", "<<z<<")";
 	std::string str = strs.str();
 	return str;
-}
-
-std::ostream & operator << (std::ostream &os, const Vector3& v)
-{
-	os<<"vector = ("<<v.x<<", "<<v.y<<", "<<v.z<<")"<<std::endl;
-	return os;
 }

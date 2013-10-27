@@ -9,24 +9,23 @@ class Vector3
 public:
 	Vector3();
 	Vector3(const Vector3& v);
-	Vector3(double xx, double yy, double zz);
+	Vector3(float xx, float yy, float zz);
 	Vector3(const Point3& p1, const Point3& p2);
 	Vector3 operator +(const Vector3& v) const;
     Vector3& operator +=(const Vector3& v);
 	Vector3 operator -(const Vector3& v) const;
 	Vector3 operator -() const;
 	Vector3 operator *(const Vector3& v) const;
-	Vector3 operator *(const double& f) const;
+	Vector3 operator *(const float& f) const;
     Vector3& operator *=(const Vector3& v);
-    Vector3& operator *=(const double& v);
+    Vector3& operator *=(const float& v);
 	Vector3& operator =(const Vector3& v);
-    double dot(const Vector3& v) const;
+    float dot(const Vector3& v) const;
     Vector3 tensor(const Vector3& v) const;
 
 	std::string toString() const;
-	friend std::ostream & operator << (std::ostream &os, const Vector3& v);
 
-	double x, y, z;
+	float x, y, z;
 };
 
 #endif // VECTOR3_H

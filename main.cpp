@@ -1,6 +1,7 @@
 #include <iostream>
 #include "point3.h"
 #include "vector3.h"
+#include "ray.h"
 
 using namespace std;
 
@@ -22,15 +23,11 @@ void testVector()
 	Point3 p1(0, 0, 0), p2(1, 4, 2);
 	Vector3 vec1(p1, p2);
 	Vector3 vec2(1, 1.7, 1);
-	Vector3 vec3 = vec1 * vec2;
-	Vector3 vec4 = vec1.tensor(vec2);
+	Ray r(p2, vec1);
 
-	cout << p1;
-	cout << p2;
-	cout << vec1;
-	cout << vec2;
-	cout << vec3;
-	cout << vec4;
-	vec4 = vec3;
-	cout << vec4;
+	cout << p1.toString() << endl;
+	cout << p2.toString() << endl;
+	cout << vec1.toString() << endl;
+	cout << vec2.toString() << endl;
+	cout << r.toString() << endl;
 }
