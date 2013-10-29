@@ -27,5 +27,5 @@ void Output::writePic()
 
 void Output::addColor(Color c, int x, int y)
 {
-	(*image)[height - y - 1][x] = c;// NOTE here is reversed!
+	(*image)[y][x] = c.toRealColor();
 }

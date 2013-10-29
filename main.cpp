@@ -14,18 +14,10 @@ int main()
 {
 	boost::shared_ptr<Scene> scene(new Scene);
 	scene->renderScene();
+	Color c = Color("black");
 	// testVector();
 	cout << "Hello RayTracer!" << endl;
 	return 0;
-}
-
-/**
- * @brief buildScene
- * build the scene for rendering
- */
-void buildScene()
-{
-
 }
 
 /**

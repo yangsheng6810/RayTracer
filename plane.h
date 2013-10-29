@@ -16,6 +16,9 @@ public:
 	Vector3 normal; // normal
 	Color color;
 	static const double kEpsilon = 1e-4; // left for understanding
+	double r_diffuse, r_reflect ;
+	Color environment_reflect, Kd, Ks;
+	double power;
 
 };
 

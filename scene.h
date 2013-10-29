@@ -16,11 +16,13 @@ class Scene:
 public:
 	Scene();
     void createTracer();
+	void buildScene();
     void renderScene();
 	bool hitBack(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitSphere(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitFloor(const Ray& ray, double& tmin, ShadePacket& sp) const;
 
+	int width, height;
 
 	std::vector<boost::shared_ptr<BaseObject> > objects;
 	/*

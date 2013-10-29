@@ -16,6 +16,9 @@ public:
 	double radius;
 	Color color;
 	const double kEpsilon;
+	double r_diffuse, r_reflect ;
+	Color environment_reflect, Kd, Ks;
+	double power;
 };
 
 #endif // SPHERE_H
