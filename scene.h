@@ -14,15 +14,23 @@ class Scene:
         public boost::enable_shared_from_this<Scene>
 {
 public:
-	Scene();
+	Scene(int w = 640, int h = 480);
     void createTracer();
 	void buildScene();
     void renderScene();
+
+
+    void renderSceneThread();
+    void renderTile(int z_start, int x_start, int z_end, int x_end) const;
+	Color traceRay(Ray ray, int z, int x, bool sample = false) const;
 	bool hitBack(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitSphere(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitFloor(const Ray& ray, double& tmin, ShadePacket& sp) const;
 
 	int width, height;
+	double inv_w, inv_h;
+	double fov, aspectratio, angle;
+	Point3 origin;
 
 	std::vector<boost::shared_ptr<BaseObject> > objects;
 	/*
