@@ -12,9 +12,9 @@ using namespace std;
 
 int main()
 {
-	boost::shared_ptr<Scene> scene(new Scene);
-	scene->renderScene();
-	Color c = Color("black");
+	boost::shared_ptr<Scene> scene(new Scene(1366, 768));
+	scene->renderSceneThread();
+	// scene->renderScene();
 	// testVector();
 	cout << "Hello RayTracer!" << endl;
 	return 0;
