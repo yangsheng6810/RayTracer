@@ -52,30 +52,42 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		Vector3 view_vec = ray.d;// (0, 1, 0);
 		Vector3 h_vec = (view_vec + light_vec);
 		h_vec.normalize();
-		double intense = (-light_vec) * sp_.normal;
+		double intense = 1 * (-light_vec) * sp_.normal;
 		if (intense < 0)
 			intense = 0;
 		Color intense_p = Color(1) * intense;
 		ret += intense_p * sp_.Kd * (-view_vec * sp_.normal);// diffuse
 		ret += intense_p * sp_.Ks * pow(h_vec * sp_.normal, sp_.power);// highlight
 		Ray reflect(sp_.hitPoint, 2 * (sp_.normal * (- ray.d)) * sp_.normal + ray.d);
+		ret += 0.4 * trace_ray(reflect, weight * 0.1);// reflection
 		ret = ret * sp_.color;
-		ret += 0.4 * trace_ray(reflect, weight * 0.4);// reflection
-		/*
 		if (sp_.transparent){
-			double ior = 1.5, eta = (sp_.inside) ? ior : 1 / ior; // are we inside or outside the surface?
+			double ior = 1.1, eta = (sp_.inside) ? ior : 1 / ior; // are we inside or outside the surface?
+			Vector3 normal = sp_.normal;
+			if (sp_.inside)
+				normal = -normal;
+			/*
 			double cosi = -sp_.normal*ray.d;
+			if (cosi < 0){
+				// std::cout<<"ERROR!"<<std::endl;
+				sp_.normal = -sp_.normal;
+				cosi = -cosi;
+			}
 			double k = 1 - eta * eta * (1 - cosi * cosi);
 			Vector3 refrdir = ray.d * eta + sp_.normal * (eta *  cosi - sqrt(k));
+			if ((refrdir * sp_.normal) * (ray.d * sp_.normal) > 0)
+				std::cout<<"Error!"<<std::endl;
+			*/
+			Vector3 refrdir = (-1 - 1/eta * (normal * ray.d)) * normal + ray.d;
 			refrdir.normalize();
 
 		    // Ray refraction(sp_.hitPoint, (1 - 1.0/n0)*(sp_.normal * (- ray.d)) * sp_.normal - (1.0/n0)*ray.d);
 			Ray refraction(sp_.hitPoint, refrdir);
-		    ret += 0.8 * trace_ray(refraction, weight * 0.4);
+		    ret += 0.6 * trace_ray(refraction, weight * 0.2);
 		}
-		*/
 		// ret.divide(10);
 		// return ret * sp_.color;
+		// ret.divide(1.2);
 		return ret;
 		// return sp_.color;
 	}
