@@ -4,23 +4,24 @@
 #include "vector3.h"
 #include "baseobject.h"
 #include "shadepacket.h"
+#include <boost/smart_ptr.hpp>
 
 class Plane : public BaseObject
 {
 public:
-	Plane();
-	Plane(const Point3& p, const Vector3& n, Color c = Color(0, 0.8, 0));
+	Plane(const Point3& p = Point3(0, 0, 0), const Vector3& n = Vector3(0, 0, 1),
+	      boost::shared_ptr<Material> m = boost::shared_ptr<Material>());
 	bool hit(const Ray& ray, double& tmin, ShadePacket& sp) const;
+	bool shadow_hit(const Ray &ray, double &tmin) const;
+	void shift(const Vector3& v);
     Color getColor(Point3 p) const;
 
 	Point3 point; // a point in the plane
 	Vector3 normal; // normal
-	Color color;
+	// Color color;
 	bool isGrid;
+	boost::shared_ptr<Material> m_ptr;
 	static const double kEpsilon = 1e-4; // left for understanding
-	double r_diffuse, r_reflect ;
-	Color environment_reflect, Kd, Ks;
-	double power;
 
 };
 

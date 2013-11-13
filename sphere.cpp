@@ -2,23 +2,11 @@
 #include <math.h>
 #include <iostream>
 
-Sphere::Sphere():
-    origin(), radius(1.0), color(Color(0.8, 0, 0)), kEpsilon(0.001),// emissionColor(Color(0, 0, 0)),
+Sphere::Sphere(const Point3 &p, const double &rr,
+               boost::shared_ptr<Material> m):
+    origin(p), radius(rr), m_ptr(m), kEpsilon(0.001/rr)
     // transparency(0), reflection(0.8)
-    Kd(Color(0.8)), Ks(Color(0.7))
 {
-	environment_reflect = Color(0.1);
-	power = 100;
-}
-
-Sphere::Sphere(const Point3 &p, const double &rr):
-    origin(p), radius(rr), color(Color(0.8, 0, 0)), kEpsilon(0.001/rr),//  emissionColor(Color(0, 0, 0)),
-    // transparency(0), reflection(0.8)
-    Kd(Color(0.8)), Ks(Color(0.7))
-{
-	environment_reflect = Color(0.1);
-	// environment_reflect = color;
-	power = 100;
 }
 
 bool Sphere::hit(const Ray& ray, double& tmin, ShadePacket& sp) const
@@ -72,14 +60,8 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadePacket& sp) const
 			sp.normal = (temp + ray.d * t) * (1/radius);
 			sp.normal.normalize();
 			sp.hitPoint = ray.o + ray.d * t;
-			sp.color = color;
-			sp.reflect = true;
-			sp.environment_reflect = environment_reflect;
-			sp.Kd = Kd;
-			sp.Ks = Ks;
-			sp.power = power;
-			sp.transparent = true;
 			sp.inside = false;
+			sp.m = *m_ptr;
 			return true;
 		}
 
@@ -91,19 +73,51 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadePacket& sp) const
 			sp.normal = (temp + ray.d * t) * (1/ radius);
 			sp.normal.normalize();
 			sp.hitPoint = ray.o + ray.d * t;
-			sp.color = color;
-			sp.reflect = true;
-			sp.environment_reflect = environment_reflect;
-			sp.Kd = Kd;
-			sp.Ks = Ks;
-			sp.power = power;
 			sp.inside = true;
-			sp.transparent = true;
+			sp.m = *m_ptr;
 			return true;
 		}
 	}
 
 	return false;
+}
+
+bool Sphere::shadow_hit(const Ray &ray, double &tmin) const
+{
+	double t;
+	// Vector3 temp = Vector3(ray.o, origin);
+	Vector3 temp = Vector3(origin, ray.o);
+	double a = ray.d * ray.d;
+	double b = temp * ray.d * 2.0;
+	double c = temp * temp - radius * radius;
+	double disc = b * b - 4.0 * a * c;
+
+	if (disc < 0.0)
+		return false;
+	else {
+		double e = sqrt(disc);
+		double denom = a * 2.0;
+		t = (-b -e) / denom;        // smaller root
+
+		if(t > kEpsilon) {
+			tmin = t;
+			return true;
+		}
+
+		t = (-b + e) / denom;
+
+		if (t > kEpsilon) {
+			tmin = t;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Sphere::shift(const Vector3 &v)
+{
+	origin = origin + v;
 }
 
 

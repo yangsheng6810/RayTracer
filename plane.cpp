@@ -1,22 +1,10 @@
 #include "plane.h"
 #include <math.h>
 
-Plane::Plane():
-    point(), normal(), color(Color(0, 0.8, 0)),
-    Kd(Color(0.8)), Ks(Color(0.4)), isGrid(true)
+Plane::Plane(const Point3 &p, const Vector3 &n, boost::shared_ptr<Material> m_):
+    point(p), normal(n), m_ptr(m_),
+    isGrid(true)
 {
-	environment_reflect = Color(0.1);
-	power = 100;
-	normal.normalize();
-
-}
-
-Plane::Plane(const Point3 &p, const Vector3 &n, Color c):
-    point(p), normal(n), color(c),
-    Kd(Color(0.8)), Ks(Color(0.4)), isGrid(true)
-{
-	environment_reflect = Color(0.1);
-	power = 100;
 	normal.normalize();
 }
 
@@ -31,20 +19,31 @@ bool Plane::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 		sp.normal = normal;
 		sp.hitPoint = ray.o + t * ray.d;
 		// sp.color = color;
-		sp.color = getColor(sp.hitPoint);
+		sp.m = *m_ptr;
+		sp.m.color = getColor(sp.hitPoint);
 		// std::cout << sp.color.toString() << std::endl;
-		sp.reflect = false;
-		sp.environment_reflect = environment_reflect;
-		sp.Kd = Kd;
-		sp.Ks = Ks;
-		sp.power = power;
-		sp.transparent = false;
 
 		return true;
 	} else {
 		sp.hit = false;
 		return false;
 	}
+}
+
+bool Plane::shadow_hit(const Ray &ray, double &tmin) const
+{
+	double t = Vector3(ray.o, point) * normal /(ray.d * normal);
+	if (t > kEpsilon) {
+		tmin = t;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void Plane::shift(const Vector3 &v)
+{
+	point = point + v;
 }
 
 /*
@@ -61,9 +60,9 @@ Color Plane::getColor(Point3 p) const
 	    int x = floor(p.x * 2) ;
 	    int z = fabs(p.z) < zero ? floor(p.y * 2) : floor(p.z * 2);
 	    if ((x ^ z) & 1)
-		    return Color("black");
+		    return Color(0.1);
 	    else
-		    return Color("white");
+		    return Color(0.6);
 	} else
-		return Color(0.4);
+		return m_ptr->color;
 }
