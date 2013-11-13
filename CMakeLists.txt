@@ -1,31 +1,82 @@
+cmake_minimum_required(VERSION 2.8)
 project(RayTracer)
 
 set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_INCLUDE_CURRENT_DIR ON)
-cmake_minimum_required(VERSION 2.8)
-#aux_source_directory(. SRC_LIST)
-aux_source_directory(${PROJECT_SOURCE_DIR} SRC_LIST)
+set(MY_SOURCES 
+		point3.cpp
+		vector3.cpp
+		color.cpp
+        light.cpp
+        parallel.cpp
+        pointlight.cpp
+        rectlight.cpp
+		baseobject.cpp
+		sphere.cpp
+		plane.cpp
+		scene.cpp
+		ray.cpp
+		material.cpp
+		shadepacket.cpp
+		trianglemesh.cpp
+        rectangle.cpp
+		output.cpp
+		tracer.cpp)
 
-message("PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
-message("SRC_LIST points to " "${SRC_LIST}")
+	#aux_source_directory(${PROJECT_SOURCE_DIR} SRC_LIST)
+
+#message("PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
+#message("SRC_LIST points to " "${SRC_LIST}")
+
+###################
+# add include
 
 find_package(PNG REQUIRED)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.54.0 COMPONENTS thread filesystem system unit_test_framework REQUIRED)
-message(status "** Boost Include: ${Boost_INCLUDE_DIR}")
-message(status "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
-message(status "** Boost Libraries: ${Boost_LIBRARIES}")
-set(Boost_USE_STATIC_LIBS  ON)
-find_package(Boost REQUIRED thread system)
+FIND_PACKAGE(Boost 1.54.0)
+IF(Boost_FOUND)
 
-add_definitions(-DWITH_SAMPLE_NUMBER=20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+    set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_LIBS  OFF)
+    set(Boost_USE_STATIC_RUNTIME OFF)
+    find_package(Boost 1.54.0 COMPONENTS thread filesystem system unit_test_framework REQUIRED thread system)
 
-add_executable(${PROJECT_NAME} ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME}
+    #find_package(Boost REQUIRED thread system)
+
+    add_definitions(-DWITH_SAMPLE_NUMBER=20)
+	add_library(my-library SHARED ${MY_SOURCES})
+	target_link_libraries(my-library
             ${CMAKE_THREAD_LIBS_INIT}
-            ${PNG_LIBRARIES}
+            #${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${Boost_LIBRARIES}
     )
 
+	add_executable(${PROJECT_NAME} main.cpp ) #${SRC_LIST})
+    target_link_libraries(${PROJECT_NAME}
+    		my-library
+            ${CMAKE_THREAD_LIBS_INIT}
+            #${PNG_LIBRARIES}
+            ${ZLIB_LIBRARIES}
+            ${Boost_LIBRARIES}
+    )
+
+    include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python3.3m")
+    FIND_PACKAGE(Boost 1.54.0 COMPONENTS python3 REQUIRED)
+
+    add_library(render SHARED render.cpp)
+    target_link_libraries(render
+    		my-library
+            ${CMAKE_THREAD_LIBS_INIT}
+            ${ZLIB_LIBRARIES}
+            ${Boost_LIBRARIES}
+    )
+
+ELSEIF(NOT Boost_FOUND)
+  MESSAGE(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?")
+ENDIF()
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  #ADD_DEFINITIONS("-Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+ELSE()
+  MESSAGE(FATAL_ERROR "CMakeLists.txt has not been tested/written for your compiler.")
+ENDIF()
