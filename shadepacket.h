@@ -3,6 +3,8 @@
 #include "point3.h"
 #include "vector3.h"
 #include "color.h"
+#include "material.h"
+#include <boost/smart_ptr.hpp>
 
 class ShadePacket
 {
@@ -14,13 +16,9 @@ public:
 	bool hit;
 	Point3 hitPoint;
 	Vector3 normal;
-	Color color;
-	bool reflect;
+
+    Material m;
 	bool inside;
-	bool transparent;
-	double transparency, reflection;
-	Color environment_reflect, Kd, Ks;
-	double power;
 };
 
 #endif // SHADEPACKET_H
