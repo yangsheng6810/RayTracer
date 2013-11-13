@@ -4,7 +4,8 @@
 
 Output::Output(int ww, int hh):
     width(ww), height(hh),
-    image(new array_type(boost::extents[height][width]))
+    image(new color_array_type(boost::extents[height][width])),
+    sample(new number_array_type(boost::extents[height][width]))
 {
     // img = rgb8_image_t(ww, hh);
     // v = view(img);
@@ -12,8 +13,10 @@ Output::Output(int ww, int hh):
     // fill_pixels(view(img), black);
 	Color c("black");
 	for (int i = 0; i < width; ++i)
-		for(int j = 0; j < height; ++j)
+		for(int j = 0; j < height; ++j){
 	        (*image)[j][i] = c;
+	        (*image)[j][i] = 0;
+		}
 
 }
 
@@ -28,9 +31,9 @@ void Output::writePic() const
 	ofs << "P6\n" << width << " " << height << "\n255\n";
 	for (unsigned i = 0; i < height; ++i)
 		for(unsigned j = 0; j < width; ++j){
-    		ofs << (unsigned char)((*image)[i][j].r * 255) <<
-	    	(unsigned char)((*image)[i][j].g * 255) <<
-		    (unsigned char)((*image)[i][j].b * 255);
+    		ofs << (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255) <<
+	    	(unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255) <<
+		    (unsigned char)((*image)[i][j].b / (*sample)[i][j] * 255);
 	    }
 	ofs.close();
 	// png_write_view("untitled.png", const_view(img));
@@ -40,6 +43,7 @@ void Output::addColor(Color c, int x, int y)
 {
     boost::mutex::scoped_lock lock(mutex_modify);
 	c.toRealColor();
-	(*image)[y][x] = c.toRealColor();
+	(*image)[y][x] += c.toRealColor();
+	(*sample)[y][x] += 1;
 	// v(y, x) = rgb8_pixel_t(c.r, c.g, c.b);
 }

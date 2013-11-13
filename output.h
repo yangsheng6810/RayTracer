@@ -10,7 +10,8 @@
 // #include <boost/gil/gil_all.hpp>
 // #include <boost/gil/extension/io/png_dynamic_io.hpp>
 
-typedef boost::multi_array<Color, 2> array_type;
+typedef boost::multi_array<Color, 2> color_array_type;
+typedef boost::multi_array<int, 2> number_array_type;
 
 class Output
 {
@@ -22,7 +23,8 @@ public:
 	int width, height;
 
 private:
-	boost::scoped_ptr<array_type> image;
+	boost::scoped_ptr<color_array_type> image;
+	boost::scoped_ptr<number_array_type> sample;
 	mutable boost::mutex mutex_output;
 	mutable boost::mutex mutex_modify;
 	// boost::gil::rgb8_image_t img;
