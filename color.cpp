@@ -13,14 +13,14 @@ Color::Color(const Color& c)
 	b = c.b;
 }
 
-Color::Color(float rr, float gg, float bb)
+Color::Color(double rr, double gg, double bb)
 {
 	r = rr;
 	g = gg;
 	b = bb;
 }
 
-Color::Color(float shade)
+Color::Color(double shade)
 {
 	r = g = b = shade;
 }
@@ -70,7 +70,7 @@ std::string Color::toString() const
 	return str;
 }
 
-void Color::divide(float f)
+void Color::divide(double f)
 {
 	r /= f;
 	g /= f;
@@ -79,17 +79,17 @@ void Color::divide(float f)
 
 Color Color::toRealColor()
 {
-	return Color(r > 1 ? 1 : r,
-	             g > 1 ? 1 : g,
-	             b > 1 ? 1 : b);
+	return Color(r > 1 ? 1.0 : r,
+	             g > 1 ? 1.0 : g,
+	             b > 1 ? 1.0 : b);
 }
 
-Color operator *(float f, const Color& c)
+Color operator *(double f, const Color& c)
 {
 	return Color(c.r * f, c.g * f, c.b * f);
 }
 
-Color operator *(const Color& c, float f)
+Color operator *(const Color& c, double f)
 {
 	return Color(c.r * f, c.g * f, c.b * f);
 }
@@ -102,4 +102,12 @@ Color operator *(const Color& c1, const Color& c2)
 Color operator +(const Color& c1, const Color& c2)
 {
 	return Color(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b);
+}
+
+
+Color blend(const Color& c1, const Color& c2)
+{
+	return Color(c1.r + c2.r - c1.r * c2.r,
+				 c1.g + c2.g - c1.g * c2.g,
+				 c1.b + c2.b - c1.b * c2.b);
 }
