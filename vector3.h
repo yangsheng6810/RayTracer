@@ -20,6 +20,8 @@ public:
     float dot(const Vector3& v) const;
     Vector3 tensor(const Vector3& v) const;
 	void normalize();
+	void addNoise();
+	double lenSquare() const;
 
 	std::string toString() const;
 

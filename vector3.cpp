@@ -1,6 +1,8 @@
 #include <sstream>
 #include "vector3.h"
+#include <cstdlib>
 #include <math.h>
+#include <time.h>
 
 Vector3::Vector3()
 {
@@ -30,6 +32,12 @@ Vector3::Vector3(const Point3 &p1, const Point3 &p2)
 	z = p2.z - p1.z;
 }
 
+inline float rand_float()
+{
+	return ((float)rand()/ (float)RAND_MAX);
+}
+
+
 Vector3& Vector3::operator +=(const Vector3& v)
 {
 	x += v.x;
@@ -55,7 +63,7 @@ float Vector3::operator *(const Vector3& v) const
 
 void Vector3::normalize()
 {
-	double n = sqrt(x*x + y*y + z*z);
+	double n = sqrt(lenSquare());
 	x = x/n;
 	y = y/n;
 	z = z/n;
@@ -109,6 +117,22 @@ float Vector3::dot(const Vector3& v) const
 Vector3 Vector3::tensor(const Vector3& v) const
 {
 	return Vector3(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
+}
+
+double Vector3::lenSquare() const
+{
+	return x * x + y * y + z * z;
+}
+
+void Vector3::addNoise()
+{
+	/*
+	Vector3 noise(rand_float(), rand_float(), rand_float());
+
+	x += noise.x / 10000;
+	y += noise.y / 10000;
+	z += noise.z / 10000;
+	*/
 }
 
 std::string Vector3::toString() const
