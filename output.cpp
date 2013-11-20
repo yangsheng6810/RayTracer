@@ -3,14 +3,14 @@
 // using namespace boost::gil;
 
 Output::Output(int ww, int hh):
-    width(ww), height(hh),
-    image(new color_array_type(boost::extents[height][width])),
-    sample(new number_array_type(boost::extents[height][width]))
+    width(ww), height(hh)
 {
     // img = rgb8_image_t(ww, hh);
     // v = view(img);
 	// rgb8_pixel_t black(0, 0, 0);
     // fill_pixels(view(img), black);
+	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
+    sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
 	Color c("black");
 	for (int i = 0; i < width; ++i)
 		for(int j = 0; j < height; ++j){
@@ -22,6 +22,14 @@ Output::Output(int ww, int hh):
 
 Output::~Output()
 {
+}
+
+void Output::setResolution(int width_, int height_)
+{
+	width = width_;
+	height = height_;
+	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
+    sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
 }
 
 void Output::writePic() const

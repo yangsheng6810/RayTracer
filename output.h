@@ -20,11 +20,12 @@ public:
 	~Output();
 	void addColor(Color c, int x, int y);
 	void writePic() const;
+	void setResolution(int width_, int height_);
 	int width, height;
 
 private:
-	boost::scoped_ptr<color_array_type> image;
-	boost::scoped_ptr<number_array_type> sample;
+	boost::shared_ptr<color_array_type> image;
+	boost::shared_ptr<number_array_type> sample;
 	mutable boost::mutex mutex_output;
 	mutable boost::mutex mutex_modify;
 	// boost::gil::rgb8_image_t img;
