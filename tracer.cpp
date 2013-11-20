@@ -62,8 +62,9 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 			l_ptr = scene_ptr->lights[i];
 			Color temp = Color(0);
 			int sample_number = 1;
+			// to speed up for debug
 			if (l_ptr->need_sample)
-				sample_number = 10;
+				sample_number = 4;
 			for(int s = 0; s != sample_number; ++s){
 		    	light_vec = l_ptr->get_direction(sp_);
 

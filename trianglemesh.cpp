@@ -2,12 +2,12 @@
 #include <sstream>
 
 TriangleMesh::TriangleMesh(boost::shared_ptr<Material> m_):
-    m_ptr(m_), kEpsilon(0.001)
+    m_ptr(m_), kEpsilon(0.0001)
 {
 	x_min = y_min = z_min =  10000;
 	x_max = y_max = z_max = -10000;
-	smooth = true;
-	// smooth = false;
+	// smooth = true;
+	smooth = false;
 }
 
 bool TriangleMesh::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
@@ -167,7 +167,7 @@ void TriangleMesh::updateLimit(const Point3 &p)
 void TriangleMesh::addFace(int v0, int v1, int v2)
 {
 	faces.push_back(Face(v0, v1, v2));
-	Vector3 n = Vector3(vertices[v1], vertices[v0]).tensor(Vector3(vertices[v2], vertices[v1]));
+	Vector3 n = Vector3(vertices[v1], vertices[v0]).tensor(Vector3(vertices[v1], vertices[v2]));
 	n.normalize();
 	face_normals.push_back(n);
 }
