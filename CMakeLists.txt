@@ -20,6 +20,7 @@ set(MY_SOURCES
 		trianglemesh.cpp
         rectangle.cpp
 		output.cpp
+        camera.cpp
 		tracer.cpp)
 
 	#aux_source_directory(${PROJECT_SOURCE_DIR} SRC_LIST)
@@ -69,6 +70,7 @@ IF(Boost_FOUND)
             ${ZLIB_LIBRARIES}
             ${Boost_LIBRARIES}
     )
+    configure_file(my_try.py my_try.py COPYONLY)
 
 ELSEIF(NOT Boost_FOUND)
   MESSAGE(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?")
