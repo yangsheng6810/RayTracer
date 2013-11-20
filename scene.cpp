@@ -74,13 +74,13 @@ void Scene::buildScene()
 	shared_ptr<Material> m_mesh(
 	            new Material(
 	                Color(255.0/255, 87.0/255, 87.0/255),
-	                0.1,
+	                0.6,
 	                Color(0.5),
-	                0.9,
-	                Color(0.1),
+	                0.2,
+	                Color(0.8),
     	            Color(0.3),
 	                100,
-	                true,
+	                false,
 	                false));
 	shared_ptr<Material> m_ground(
 	            new Material(
@@ -95,9 +95,9 @@ void Scene::buildScene()
 	                false));
 	shared_ptr<Material> m_background(
 	            new Material(
-	                Color(0.7),
+	                Color(0.4),
 	                0.4,
-	                Color(0.7),
+	                Color(0.2),
 	                0.1,
 	                Color(0.2),
     	            Color(0.3),
@@ -120,14 +120,14 @@ void Scene::buildScene()
 	shared_ptr<Sphere> s;
 	for (int i = -2; i <= 2; i++ )
 		for (int j = 0; j <= 4; j++){
-	        s = shared_ptr<Sphere>(new Sphere(Point3((double)i/2.0, 3, (double)j/2.0 + 0.2), 0.2, m_sphere1));
+	        s = shared_ptr<Sphere>(new Sphere(Point3((double)i/2.0, -1, (double)j/2.0 + 0.2), 0.2, m_sphere1));
 	        objects.push_back(shared_ptr<BaseObject>(s));
 		}
 
 	s = shared_ptr<Sphere>(new Sphere(Point3(0, -2, 0.4), 0.4, m_sphere2));
 	objects.push_back(shared_ptr<BaseObject>(s));
 
-	s = shared_ptr<Sphere>(new Sphere(Point3(-0.5, -4, 0.6), 0.6, m_sphere3));
+	s = shared_ptr<Sphere>(new Sphere(Point3(-0.5, -3, 0.6), 0.6, m_sphere3));
 	objects.push_back(shared_ptr<BaseObject>(s));
 
 	shared_ptr<TriangleMesh> tt = shared_ptr<TriangleMesh>(new TriangleMesh(m_mesh));
@@ -147,7 +147,7 @@ void Scene::buildScene()
 	tt->addFace(1, 3, 4);
 	// std::cout<<tt->toString()<<std::endl;
 
-	tt->shift(Vector3(1, -1, 1));
+	tt->shift(Vector3(1, -4, 1));
 	objects.push_back(shared_ptr<BaseObject>(tt));
 
 	shared_ptr<Plane> p;
@@ -155,8 +155,8 @@ void Scene::buildScene()
 	p->isGrid = false;
 	objects.push_back(shared_ptr<BaseObject>(p));
 
-	p = shared_ptr<Plane>(new Plane(Point3(0, 6, 0), Vector3(0, -1, 0), m_background));// background
-	// p->isGrid = false;
+	p = shared_ptr<Plane>(new Plane(Point3(0, 1, 0), Vector3(0, -1, 0), m_background));// background
+	p->isGrid = false;
 	objects.push_back(shared_ptr<BaseObject>(p)); // background
 
 	// shared_ptr<Rectangle> rr =
@@ -168,7 +168,7 @@ void Scene::buildScene()
 	// objects.push_back(shared_ptr<BaseObject>(rl));
 	//
 	shared_ptr<Rectangle> rr =
-	        shared_ptr<Rectangle>(new Rectangle(Point3(6, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 6), m_rect));
+	        shared_ptr<Rectangle>(new Rectangle(Point3(6, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 12), m_rect));
 	// objects.push_back(shared_ptr<BaseObject>(rr));
 
 
@@ -183,7 +183,7 @@ void Scene::buildScene()
 	l = shared_ptr<Light>(new RectLight(rl, 200, Color(1.0)));
 	lights.push_back(l);
 
-	l = shared_ptr<Light>(new RectLight(rr, 60, Color(1.0)));
+	l = shared_ptr<Light>(new RectLight(rr, 140, Color(1.0)));
 	lights.push_back(l);
 }
 
@@ -398,15 +398,65 @@ void Scene::renderSceneThread()
     //threads.join_all();
 }
 
+void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+{
+    camera = boost::shared_ptr<Camera>(new Camera(location, width, height));
+    camera->setVectors(v1, v2, v3, v4);
+}
+
+void Scene::renderSceneThreadCamera()
+{
+	if (!camera){
+	    camera = boost::shared_ptr<Camera>(new Camera(Point3(0, -15, 7), width, height));
+	    camera->generateVectors(Vector3(0, 4, -2));
+	}
+	tracer_ptr->setScene(shared_from_this());
+	int row_number = 3;
+	int col_number = 4;
+	int tile_height = height / row_number;
+	int tile_width = width / col_number;
+
+	// sample
+	// the following is commented out for debug
+	// for(int sample = 0; sample != 80; sample++)
+	for (int i=0; i < height; i += tile_height)
+		for (int j = 0; j < width; j += tile_width){
+			pool.schedule(boost::bind(&Scene::renderTile_samp_camera, this, i, j,
+			                   i + tile_height < height ? i + tile_height : height,
+		                       j + tile_width  < width  ? j + tile_width  : width));
+    }
+	waitingThread = boost::thread(&Scene::waiting, this);
+    //threads.join_all();
+}
+
 void Scene::setCallback(boost::function<void()> f)
 {
 	callback = f;
+}
+
+
+void Scene::stopAllThreads()
+{
+	pool.clear();
+	std::cout<<"All threads stopped"<<std::endl;
 }
 
 void Scene::waiting()
 {
 	pool.wait(0);
 	callback();
+}
+
+void Scene::setResolution(int width_, int height_)
+{
+	width = width_;
+	height = height_;
+	inv_w = 1.0 / width;
+	inv_h = 1.0 / height;
+	if (camera)
+    	camera->setResolution(width, height);
+	if (output)
+		output->setResolution(width, height);
 }
 
 void Scene::renderTile(int z_start, int x_start, int z_end, int x_end, bool sample) const
@@ -425,8 +475,6 @@ void Scene::renderTile_no_samp(int z_start, int x_start, int z_end, int x_end) c
 	// ray.o = Point3(0, -20, 1);
 	ray.o = origin;
 
-	srand(10000);
-
 	for(int z = z_start; z < z_end; z++)
 		for(int x = x_start; x < x_end; x++){
 			color = traceRay_no_samp(ray, z, x);
@@ -443,8 +491,6 @@ void Scene::renderTile_samp(int z_start, int x_start, int z_end, int x_end) cons
 	// ray.o = Point3(0, -20, 1);
 	ray.o = origin;
 
-	srand(10000);
-
 	for(int kkk = 0; kkk != 1; kkk++){
 		for(int z = z_start; z < z_end; z++){
 			for(int x = x_start; x < x_end; x++){
@@ -456,6 +502,33 @@ void Scene::renderTile_samp(int z_start, int x_start, int z_end, int x_end) cons
 	}
 
 }
+
+void Scene::renderTile_samp_camera(int z_start, int x_start, int z_end, int x_end) const
+{
+	Color color;
+	Ray ray;
+
+	try{
+	for(int kkk = 0; kkk != 1; kkk++){
+		for(int z = z_start; z < z_end; z++){
+			for(int x = x_start; x < x_end; x++){
+				color = Color(0, 0, 0);
+				ray = camera->getRay(x, z);
+				ray.normalize();
+
+			    color += tracer_ptr->trace_ray(ray, 1);
+				output->addColor(color, x, z);
+			}
+		}
+		output->writePic();
+	}
+	}
+	catch(boost::thread_interrupted& )
+	{
+		std::cout<<"interrupted"<<std::endl;
+	}
+}
+
 Color Scene::traceRay_no_samp(Ray ray, int z, int x) const
 {
 	Color color;
