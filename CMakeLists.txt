@@ -2,10 +2,13 @@ cmake_minimum_required(VERSION 2.8)
 project(RayTracer)
 
 set(CMAKE_BUILD_TYPE Release)
-set(MY_SOURCES 
+#set(CMAKE_BUILD_TYPE Debug)
+set(MY_SOURCES
 		point3.cpp
 		vector3.cpp
 		color.cpp
+        #bbox.cpp
+        #sahkdtree.cpp
         light.cpp
         parallel.cpp
         pointlight.cpp
@@ -46,7 +49,7 @@ IF(Boost_FOUND)
 	add_library(my-library SHARED ${MY_SOURCES})
 	target_link_libraries(my-library
             ${CMAKE_THREAD_LIBS_INIT}
-            #${PNG_LIBRARIES}
+            ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${Boost_LIBRARIES}
     )
@@ -56,29 +59,34 @@ IF(Boost_FOUND)
     		my-library
             ${CMAKE_THREAD_LIBS_INIT}
             #${PNG_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-            ${Boost_LIBRARIES}
+            #${ZLIB_LIBRARIES}
+            #${Boost_LIBRARIES}
     )
 
     include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python3.3m")
+    #include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python2.7")
     FIND_PACKAGE(Boost 1.54.0 COMPONENTS python3 REQUIRED)
+    #FIND_PACKAGE(Boost 1.54.0 COMPONENTS python REQUIRED)
 
-    add_library(render SHARED render.cpp)
+    add_library(render SHARED render.cpp) # ${MY_SOURCES})
     target_link_libraries(render
-    		my-library
+            my-library
             ${CMAKE_THREAD_LIBS_INIT}
             ${ZLIB_LIBRARIES}
             ${Boost_LIBRARIES}
     )
     configure_file(my_try.py my_try.py COPYONLY)
+    configure_file(render_engine.py render_engine.py COPYONLY)
 
 ELSEIF(NOT Boost_FOUND)
   MESSAGE(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?")
 ENDIF()
 
+
+
 IF(CMAKE_COMPILER_IS_GNUCXX)
   #ADD_DEFINITIONS("-Wall")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -std=c++03")
 ELSE()
   MESSAGE(FATAL_ERROR "CMakeLists.txt has not been tested/written for your compiler.")
 ENDIF()
