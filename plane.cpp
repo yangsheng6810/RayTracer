@@ -19,6 +19,7 @@ bool Plane::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 		sp.normal = normal;
 		sp.hitPoint = ray.o + t * ray.d;
 		// sp.color = color;
+		sp.inside = false;
 		sp.m = *m_ptr;
 		sp.m.color = getColor(sp.hitPoint);
 		// std::cout << sp.color.toString() << std::endl;
