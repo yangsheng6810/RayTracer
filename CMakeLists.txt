@@ -7,8 +7,8 @@ set(MY_SOURCES
 		point3.cpp
 		vector3.cpp
 		color.cpp
-        #bbox.cpp
-        #sahkdtree.cpp
+        bbox.cpp
+        sahkdtree.cpp
         light.cpp
         parallel.cpp
         pointlight.cpp
