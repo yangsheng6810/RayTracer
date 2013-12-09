@@ -58,13 +58,14 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		double intense;
 		boost::shared_ptr<Light> l_ptr;
 		Color intense_p;
+		if (!sp_.m.transparent || !sp_.inside)
 		for(int i = 0; i != scene_ptr->lights.size(); ++i){
 			l_ptr = scene_ptr->lights[i];
 			Color temp = Color(0);
 			int sample_number = 1;
 			// to speed up for debug
 			if (l_ptr->need_sample)
-				sample_number = 4;
+				sample_number = 5;
 			for(int s = 0; s != sample_number; ++s){
 		    	light_vec = l_ptr->get_direction(sp_);
 
@@ -87,7 +88,9 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		        	if (intense < 0) // don't know why
 			        	intense = 0;
 			    	intense_p = l_ptr->L(sp_) * intense;
+					// may not produce a good effect
 			    	intense_p.divide(light_vec.lenSquare());
+			    	// intense_p.divide(10 * sqrt(light_vec.lenSquare()));
 		        	temp += intense_p * m.Kd * (-view_vec * sp_.normal);// diffuse
 		        	temp += intense_p * m.Ks * pow(h_vec * sp_.normal, m.power);// highlight
 				}
@@ -113,11 +116,13 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		// ret += reflect_c * fresneleffect;
 
 		Color refract_c = Color(0);
+		bool inside = false;
 
 		// start for refract light
 		if (m.transparent){
 			double ior = 1.1, eta = (sp_.inside) ? ior : 1 / ior; // are we inside or outside the surface?
 			Vector3 normal = sp_.normal;
+			inside = sp_.inside;
 			if (sp_.inside)
 				normal = -normal;
 
@@ -143,8 +148,12 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		// ret.divide(10);
 		// return ret * sp_.color;
 		// ret.divide(1.2);
-		ret = environment + diffuse * m.r_diffuse + (reflect_c + refract_c) * m.r_reflect;
-		ret = ret * m.color;
+		if (inside)
+		    ret = (reflect_c + refract_c) * m.r_reflect;
+        else {
+    		ret = environment + diffuse * m.r_diffuse + (reflect_c + refract_c) * m.r_reflect;
+		    ret = ret * m.color;
+        }
 		return ret.toRealColor();
 		// return sp_.color;
 	}
