@@ -20,7 +20,7 @@ int main()
 	boost::shared_ptr<Scene> scene(new Scene(1366, 768));
 	scene->setCallback(printSuccess);
 	scene->setResolution(800, 600);
-	scene->renderSceneThreadCamera();
+	scene->renderScene();
 	// scene->renderScene();
 	// testVector();
 	cout << "Hello RayTracer!" << endl;
