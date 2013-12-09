@@ -6,8 +6,8 @@ TriangleMesh::TriangleMesh(boost::shared_ptr<Material> m_):
 {
 	x_min = y_min = z_min =  10000;
 	x_max = y_max = z_max = -10000;
-	// smooth = true;
-	smooth = false;
+	smooth = true;
+	// smooth = false;
 }
 
 bool TriangleMesh::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
@@ -128,6 +128,7 @@ bool TriangleMesh::hitFace(int index, const Ray &ray, double &tmin, ShadePacket 
 	}else
     	sp.normal = face_normals[index];
 	sp.m = *m_ptr;
+	sp.inside = (sp.normal * ray.d) > 0;
 	sp.hitPoint = ray.o + t * ray.d;
 
 	return true;
