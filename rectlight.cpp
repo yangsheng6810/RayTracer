@@ -18,8 +18,13 @@ inline float rand_float()
 Vector3 RectLight::get_direction(const ShadePacket &sp) const
 {
 	Point3 p = rect_ptr->p0;
+#ifdef WITH_SAMPLE_NUMBER
 	p = p + rand_float() * rect_ptr->a;
 	p = p + rand_float() * rect_ptr->b;
+#else
+	p = p + 0.5 * rect_ptr->a;
+	p = p + 0.5 * rect_ptr->b;
+#endif
 	Vector3 ret = Vector3(sp.hitPoint, p);
 	return ret;
 }
