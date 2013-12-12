@@ -17,6 +17,7 @@ public:
 
 	Point3 o;
 	Vector3 d;
+	Vector3 inv_d;
 };
 
 #endif // RAY_H
