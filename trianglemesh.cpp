@@ -1,21 +1,24 @@
 #include "trianglemesh.h"
+#include "sahkdtree.h"
+#include <boost/make_shared.hpp>
 #include <sstream>
 
-TriangleMesh::TriangleMesh(boost::shared_ptr<Material> m_):
-    m_ptr(m_), kEpsilon(0.0001)
+TriangleMesh::TriangleMesh(boost::shared_ptr<Material> m_, bool smooth_):
+    m_ptr(m_), kEpsilon(0.0001), smooth(smooth_)
 {
 	x_min = y_min = z_min =  10000;
 	x_max = y_max = z_max = -10000;
-	smooth = true;
-	// smooth = false;
+	tree_ptr = boost::shared_ptr<SAHKDTree>(new SAHKDTree());
 }
 
 bool TriangleMesh::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 {
+	return tree_ptr->hit(ray, tmin, sp);
+	/*
 	double tmin_ = 1e10, tmin_temp;
 	ShadePacket sp_, sp_temp;
-	for(size_t i = 0; i != faces.size(); ++i)
-		if (hitFace(i, ray, tmin_temp, sp_temp) && tmin_temp < tmin_){
+	for(size_t i = 0; i < triangles.size(); ++i)
+		if (triangles[i]->hit(ray, tmin_temp, sp_temp) && tmin_temp < tmin_){
 			tmin_ = tmin_temp;
 			sp_ = sp_temp;
 		}
@@ -25,13 +28,17 @@ bool TriangleMesh::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 		return true;
 	} else
     	return false;
+	*/
 }
 
 bool TriangleMesh::shadow_hit(const Ray &ray, double &tmin) const
 {
+	ShadePacket sp;
+	return tree_ptr->hit(ray, tmin, sp);
+	/*
 	double tmin_ = 1e10, tmin_temp;
-	for(size_t i = 0; i != faces.size(); ++i)
-		if (shadow_hitFace(i, ray, tmin_temp) && tmin_temp < tmin_){
+	for(size_t i = 0; i != triangles.size(); ++i)
+		if (triangles[i]->shadow_hit(ray, tmin_temp) && tmin_temp < tmin_){
 			tmin_ = tmin_temp;
 		}
 	if (tmin_ < 1e10){
@@ -39,13 +46,14 @@ bool TriangleMesh::shadow_hit(const Ray &ray, double &tmin) const
 		return true;
 	} else
     	return false;
+		*/
 }
 
-bool TriangleMesh::shadow_hitFace(int index, const Ray &ray, double &tmin) const
+bool TriangleMesh::shadow_hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin) const
 {
-	Point3 v0 = vertices[faces[index].v0];
-	Point3 v1 = vertices[faces[index].v1];
-	Point3 v2 = vertices[faces[index].v2];
+	Point3 v0 = vertices[v0_];
+	Point3 v1 = vertices[v1_];
+	Point3 v2 = vertices[v2_];
 
 	double a = v0.x - v1.x, b = v0.x - v2.x, c = ray.d.x, d = v0.x - ray.o.x;
 	double e = v0.y - v1.y, f = v0.y - v2.y, g = ray.d.y, h = v0.y - ray.o.y;
@@ -83,11 +91,11 @@ bool TriangleMesh::shadow_hitFace(int index, const Ray &ray, double &tmin) const
 	return true;
 }
 
-bool TriangleMesh::hitFace(int index, const Ray &ray, double &tmin, ShadePacket &sp) const
+bool TriangleMesh::hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin, ShadePacket &sp) const
 {
-	Point3 v0 = vertices[faces[index].v0];
-	Point3 v1 = vertices[faces[index].v1];
-	Point3 v2 = vertices[faces[index].v2];
+	Point3 v0 = vertices[v0_];
+	Point3 v1 = vertices[v1_];
+	Point3 v2 = vertices[v2_];
 
 	double a = v0.x - v1.x, b = v0.x - v2.x, c = ray.d.x, d = v0.x - ray.o.x;
 	double e = v0.y - v1.y, f = v0.y - v2.y, g = ray.d.y, h = v0.y - ray.o.y;
@@ -123,10 +131,10 @@ bool TriangleMesh::hitFace(int index, const Ray &ray, double &tmin, ShadePacket 
 	tmin = t;
 	sp.hit = true;
 	if (smooth){
-		sp.normal = (1 - beta - gamma ) * normals[faces[index].v0] + beta * normals[faces[index].v1] + gamma * normals[faces[index].v2];
+		sp.normal = (1 - beta - gamma ) * normals[v0_] + beta * normals[v1_] + gamma * normals[v2_];
 		sp.normal.normalize();
-	}else
-    	sp.normal = face_normals[index];
+	}
+	// else is assigned in Triangle::hit
 	sp.m = *m_ptr;
 	sp.inside = (sp.normal * ray.d) > 0;
 	sp.hitPoint = ray.o + t * ray.d;
@@ -144,6 +152,7 @@ void TriangleMesh::addVertice(const Point3 &p, const Vector3 &v)
 {
 	vertices.push_back(p);
 	normals.push_back(v);
+	bBox.extends(p);
 	updateLimit(p);
 }
 
@@ -167,10 +176,10 @@ void TriangleMesh::updateLimit(const Point3 &p)
 
 void TriangleMesh::addFace(int v0, int v1, int v2)
 {
-	faces.push_back(Face(v0, v1, v2));
+	// faces.push_back(Face(v0, v1, v2));
 	Vector3 n = Vector3(vertices[v1], vertices[v0]).tensor(Vector3(vertices[v1], vertices[v2]));
 	n.normalize();
-	face_normals.push_back(n);
+	triangles.push_back(boost::shared_ptr<Triangle>(new Triangle(shared_from_this(), v0, v1, v2, n)));
 }
 
 std::string TriangleMesh::toString() const
@@ -179,8 +188,16 @@ std::string TriangleMesh::toString() const
 	for(int i = 0; i < vertices.size(); ++i)
 		strs<<"["<<i<<vertices[i].toString()<<"]"<<std::endl;
 	strs<<std::endl;
-	for(int i = 0; i < faces.size(); ++i)
-	    strs<<"("<<faces[i].v0<<", "<<faces[i].v1<<", "<<faces[i].v2<<")"<<std::endl;
+	for(int i = 0; i < triangles.size(); ++i){
+	    strs<<"("<<boost::static_pointer_cast<Triangle>(triangles[i])->v0<<
+		      ", "<<boost::static_pointer_cast<Triangle>(triangles[i])->v1<<
+		      ", "<<boost::static_pointer_cast<Triangle>(triangles[i])->v2<<")"<<std::endl;
+	}
 	std::string str = strs.str();
 	return str;
+}
+
+void TriangleMesh::finishObject()
+{
+	tree_ptr->build(triangles);
 }
