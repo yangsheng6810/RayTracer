@@ -9,6 +9,7 @@ set(MY_SOURCES
 		color.cpp
         bbox.cpp
         sahkdtree.cpp
+        triangle.cpp
         light.cpp
         parallel.cpp
         pointlight.cpp
