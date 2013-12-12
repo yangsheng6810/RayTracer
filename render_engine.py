@@ -37,9 +37,11 @@ class CustomRenderEngine(bpy.types.RenderEngine):
         self.size_x = int(scene.render.resolution_x * scale)
         self.size_y = int(scene.render.resolution_y * scale)
 
-        #if scene.name == 'preview':
+        if scene.name == 'preview':
+            print("preview")
         #    self.render_preview(scene)
-        #else:
+        else:
+            print("render")
         #    self.render_scene(scene)
         #self.thread_num = self.render_engine.get_thread_num()
         self.render_engine.render(self, bpy.context, bpy.data)
@@ -151,4 +153,8 @@ properties_data_camera.DATA_PT_lens.COMPAT_ENGINES.add('custom_renderer')
 
 from bl_ui import properties_material
 properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('custom_renderer')
+properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('custom_renderer')
+properties_material.MATERIAL_PT_diffuse.COMPAT_ENGINES.add('custom_renderer')
+properties_material.MATERIAL_PT_specular.COMPAT_ENGINES.add('custom_renderer')
+properties_material.MATERIAL_PT_transp.COMPAT_ENGINES.add('custom_renderer')
 del properties_material
