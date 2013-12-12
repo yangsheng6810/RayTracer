@@ -22,6 +22,7 @@ Scene::Scene(int w, int h):
 	tracer_ptr(new Tracer())
 {
 	// temporarily!
+	// sample = 100;
 	sample = 100;
 	buildScene();
 	inv_w = 1.0/width;
@@ -47,11 +48,11 @@ void Scene::buildScene()
 	            new Material(
 	                // Color(92.0/255, 228.0/255, 255.0/255),
 	                Color(255.0/255, 226.0/255, 190.0/255),
-	                0.6,
     	            Color(0.2),
-    	            0.2,
     	            Color(0.1),
     	            Color(0.3),
+	                0.4,
+    	            0.2,
     	            100,
     	            true,
     	            true));
@@ -59,11 +60,11 @@ void Scene::buildScene()
 	            new Material(
 	                Color(178.0/255, 255.0/255, 77.0/255),
 	                // Color(0.2),
-	                0.6,
 	                Color(0.2),
-	                0.2,
 	                Color(0.3),
     	            Color(0.3),
+	                0.6,
+	                0.2,
 	                100,
 	                true,
 	                false));
@@ -71,55 +72,55 @@ void Scene::buildScene()
 	            new Material(
 	                Color(0.8),
 	                // Color(0.2),
-	                0.1,
-	                Color(0.8),
-	                0.9,
-	                Color(1),
+	                Color(0.2),
+	                Color(0.1),
     	            Color(0.3),
-	                100,
+	                0.1,
+	                0.1,
+	                1000,
 	                true,
 	                true));
 	shared_ptr<Material> m_mesh(
 	            new Material(
 	                Color(255.0/255, 87.0/255, 87.0/255),
-	                0.6,
 	                Color(0.5),
-	                0.2,
 	                Color(0.8),
     	            Color(0.3),
+	                0.6,
+	                0.2,
 	                100,
 	                false,
 	                false));
 	shared_ptr<Material> m_ground(
 	            new Material(
 	                Color(0.8),
-	                0.4,
 	                Color(0.2),// should be 0.8
-	                0.6,
 	                Color(0.1),
     	            Color(0.3),
+	                0.4,
+	                0.2,
 	                100,
 	                true,
 	                false));
 	shared_ptr<Material> m_background(
 	            new Material(
 	                Color(0.4),
-	                0.4,
 	                Color(0.2),
-	                0.1,
 	                Color(0.2),
     	            Color(0.3),
+	                0.4,
+	                0.3,
 	                100,
 	                true,
 	                false));
 	shared_ptr<Material> m_rect(
 	            new Material(
 	                Color(0.8),
-	                0.9,
     	            Color(0.4),
-    	            0.1,
     	            Color(0.2),
     	            Color(0),
+	                0.9,
+    	            0.1,
     	            100,
     	            true,
     	            false));
@@ -138,14 +139,16 @@ void Scene::buildScene()
 
 	s = shared_ptr<Sphere>(new Sphere(Point3(-0.5, -3, 0.6), 0.6, m_sphere3));
 	objects.push_back(shared_ptr<BaseObject>(s));
+	*/
 
-	shared_ptr<TriangleMesh> tt = shared_ptr<TriangleMesh>(new TriangleMesh(m_mesh));
+	/*
+	shared_ptr<TriangleMesh> tt = shared_ptr<TriangleMesh>(new TriangleMesh(m_mesh, false));
 	tt->addVertice(Point3( 0,  0, 0), Vector3( 0,  0, -1));
-	tt->addVertice(Point3( 0,  0, 1), Vector3( 0,  0,  1));
-	tt->addVertice(Point3( 0.5,  0, 0.5), Vector3( 1,  0,  0));
-	tt->addVertice(Point3(-0.5,  0, 0.5), Vector3(-1,  0,  0));
-	tt->addVertice(Point3( 0,  0.5, 0.5), Vector3( 0,  1,  0));
-	tt->addVertice(Point3( 0, -0.5, 0.5), Vector3( 0, -1,  0));
+	tt->addVertice(Point3( 0,  0, 4), Vector3( 0,  0,  1));
+	tt->addVertice(Point3( 2,  0, 2), Vector3( 1,  0,  0));
+	tt->addVertice(Point3(-2,  0, 2), Vector3(-1,  0,  0));
+	tt->addVertice(Point3( 0,  2, 2), Vector3( 0,  1,  0));
+	tt->addVertice(Point3( 0, -2, 2), Vector3( 0, -1,  0));
 	tt->addFace(0, 2, 4);
 	tt->addFace(0, 4, 3);
 	tt->addFace(0, 3, 5);
@@ -154,9 +157,10 @@ void Scene::buildScene()
 	tt->addFace(1, 2, 5);
 	tt->addFace(1, 5, 3);
 	tt->addFace(1, 3, 4);
+	tt->finishObject();
 	// std::cout<<tt->toString()<<std::endl;
 
-	tt->shift(Vector3(1, -4, 1));
+	// tt->shift(Vector3(1, -4, 1));
 	objects.push_back(shared_ptr<BaseObject>(tt));
 	*/
 
@@ -166,7 +170,7 @@ void Scene::buildScene()
 	objects.push_back(shared_ptr<BaseObject>(p));
 
 	p = shared_ptr<Plane>(new Plane(Point3(0, 1, 0), Vector3(0, -1, 0), m_background));// background
-	p->isGrid = false;
+	// p->isGrid = false;
 	objects.push_back(shared_ptr<BaseObject>(p)); // background
 
 	// shared_ptr<Rectangle> rr =
@@ -190,7 +194,7 @@ void Scene::buildScene()
 	// l = shared_ptr<Light>(new Parallel(light_vec, 5, Color(1.0)));
 	// l = shared_ptr<Light>(new PointLight(Point3(-12, -9, 9), 220, Color(1.0)));
 	// lights.push_back(l);
-	l = shared_ptr<Light>(new RectLight(rl, 200, Color(1.0)));
+	l = shared_ptr<Light>(new RectLight(rl, 400, Color(1.0)));
 	lights.push_back(l);
 
 	l = shared_ptr<Light>(new RectLight(rr, 140, Color(1.0)));
@@ -206,8 +210,8 @@ void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vecto
 void Scene::renderScene()
 {
 	if (!camera){
-	    camera = boost::shared_ptr<Camera>(new Camera(Point3(0, -15, 7), width, height));
-	    camera->generateVectors(Vector3(0, 4, -2));
+	    camera = boost::shared_ptr<Camera>(new Camera(Point3(0, -12, 1), width, height));
+	    camera->generateVectors(Vector3(0, 6, 0));
 	}
 	tracer_ptr->setScene(shared_from_this());
 	int tile_height = height / row_number;
@@ -231,7 +235,8 @@ void Scene::renderScene()
 	                   false));
    */
 	// only for try!
-	// waitingThread = boost::thread(&Scene::waiting, this);
+	if (!sendTile)
+	    waitingThread = boost::thread(&Scene::waiting, this);
     //threads.join_all();
 }
 
@@ -338,15 +343,27 @@ void Scene::addObject()
 	            new Material(
 	                // Color(92.0/255, 228.0/255, 255.0/255),
 	                Color(255.0/255, 226.0/255, 190.0/255),
-	                0.6,
     	            Color(0.2),
-    	            0.2,
     	            Color(0.1),
     	            Color(0.3),
+	                0.6,
+    	            0.2,
     	            1000,
     	            false,
     	            false));
-	new_object = boost::shared_ptr<TriangleMesh>(new TriangleMesh(material));
+	shared_ptr<Material> m_sphere3(
+	            new Material(
+	                Color(0.8),
+	                // Color(0.2),
+	                Color(0.8),
+	                Color(0.7),
+    	            Color(0.3),
+	                0.05,
+	                0.1,
+	                100,
+	                true,
+	                true));
+	new_object = boost::shared_ptr<TriangleMesh>(new TriangleMesh(m_sphere3, true));
 }
 
 void Scene::addVertice(const Point3& point, const Vector3& normal)
@@ -363,7 +380,9 @@ void Scene::addFace(int v1, int v2, int v3)
 
 void Scene::finishObject()
 {
+	new_object->finishObject();
 	std::cout<<"in finishObject"<<std::endl;
 	objects.push_back(new_object);
+	// like new_object = NULL;
 	new_object = boost::shared_ptr<TriangleMesh>();
 }
