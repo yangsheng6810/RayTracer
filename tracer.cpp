@@ -21,7 +21,7 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 {
 	if (weight < 0.01)
 		return Color("black");
-	Color environment_light = Color(0.4);
+	Color environment_light = Color(1);
     ShadePacket sp, sp_;
 	double t, t_ = INFINITY;
 	boost::shared_ptr<Scene> scene_ptr = scene_weak_ptr.lock();
@@ -64,8 +64,10 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 			Color temp = Color(0);
 			int sample_number = 1;
 			// to speed up for debug
+#ifdef WITH_SAMPLE_NUMBER
 			if (l_ptr->need_sample)
 				sample_number = 5;
+#endif
 			for(int s = 0; s != sample_number; ++s){
 		    	light_vec = l_ptr->get_direction(sp_);
 
@@ -108,12 +110,15 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 		double power0 = pow(1 - ratio, 3);
 		double fresneleffect = 0.9 * power0 + 0.1;
 
+		Color reflect_c = Color(0);
 		// start for reflect light
-		Ray reflect(sp_.hitPoint, 2 * (sp_.normal * (- ray.d)) * sp_.normal + ray.d);
-		reflect.d.addNoise();
-		// Color reflect_c = 0.4 * trace_ray(reflect, weight * 0.1);// reflection
-		Color reflect_c = m.Kd * trace_ray(reflect, weight * 0.2);// reflection
-		// ret += reflect_c * fresneleffect;
+		if (m.reflect){
+		    Ray reflect(sp_.hitPoint, 2 * (sp_.normal * (- ray.d)) * sp_.normal + ray.d);
+		    // reflect.d.addNoise();
+		    // Color reflect_c = 0.4 * trace_ray(reflect, weight * 0.1);// reflection
+		    reflect_c = trace_ray(reflect, weight * 0.2);// reflection
+		    // ret += reflect_c * fresneleffect;
+		}
 
 		Color refract_c = Color(0);
 		bool inside = false;
@@ -140,18 +145,21 @@ Color Tracer::trace_ray(const Ray& ray, float weight) const
 
 		    // Ray refraction(sp_.hitPoint, (1 - 1.0/n0)*(sp_.normal * (- ray.d)) * sp_.normal - (1.0/n0)*ray.d);
 			Ray refraction(sp_.hitPoint, refrdir);
-			refraction.d.addNoise();
+			// not implemented, and may not need
+			// refraction.d.addNoise();
 		    // ret += 0.6 * trace_ray(refraction, weight * 0.2);
-		    refract_c = m.Ks * 0.8 * trace_ray(refraction, weight * 0.2);
+		    refract_c = trace_ray(refraction, weight * 0.2);
 			// ret += refract_c * (1 - fresneleffect);
 		}
 		// ret.divide(10);
 		// return ret * sp_.color;
 		// ret.divide(1.2);
 		if (inside)
-		    ret = (reflect_c + refract_c) * m.r_reflect;
+		    ret = reflect_c * m.r_reflect
+			      + refract_c * (1 - m.r_diffuse - m.r_reflect);
         else {
-    		ret = environment + diffuse * m.r_diffuse + (reflect_c + refract_c) * m.r_reflect;
+			ret = environment + diffuse * m.r_diffuse + reflect_c * m.r_reflect
+			      + refract_c * (1 - m.r_diffuse - m.r_reflect);
 		    ret = ret * m.color;
         }
 		return ret.toRealColor();

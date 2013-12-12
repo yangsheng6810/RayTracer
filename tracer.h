@@ -15,6 +15,7 @@ public:
 
 	virtual Color trace_ray(const Ray& ray, float weight) const;
 	boost::weak_ptr<Scene> scene_weak_ptr;
+
 };
 
 #endif // TRACER_H
