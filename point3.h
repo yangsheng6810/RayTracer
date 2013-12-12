@@ -10,6 +10,8 @@ public:
 	Point3(const Point3& p);
 	Point3(float xx, float yy, float zz);
 	Point3& operator = (const Point3& p);
+	float& operator[] (const int& index);
+	float get(const int& index) const;
 
 	std::string toString() const;
 
