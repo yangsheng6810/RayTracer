@@ -8,6 +8,10 @@ Rectangle::Rectangle(const Point3& p_, const Vector3& a_,
 	b_lenSquare = b.lenSquare();
 	normal = a.tensor(b);
 	normal.normalize();
+	bBox.extends(p0);
+	bBox.extends(p0 + a);
+	bBox.extends(p0 + b);
+	bBox.extends(p0 + a + b);
 	// std::cout<<normal.toString()<<std::endl;
 }
 
