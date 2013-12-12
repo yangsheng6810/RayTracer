@@ -2,12 +2,12 @@
 #include <sstream>
 
 Material::Material(Color c_, double r_diffuse_, Color Kd_, double r_reflect_, Color Ks_, Color environment_reflect_,
-                   double power_, bool reflect_, bool transparent_):
+                   double power_, bool reflect_, bool transparent_, bool isLight_):
     color(c_), environment_reflect(environment_reflect_),
     Kd(Kd_), Ks(Ks_),
     power(power_),
     reflect(reflect_), transparent(transparent_),
-    isLight(false), light_ptr(boost::shared_ptr<Light>()),
+    isLight(isLight_), light_ptr(boost::shared_ptr<Light>()),
     r_diffuse(r_diffuse_), r_reflect(r_reflect_)
 {
 }
