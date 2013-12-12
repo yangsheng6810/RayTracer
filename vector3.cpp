@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <math.h>
 #include <time.h>
+#include <cstdlib>
+#include <cassert>
 
 Vector3::Vector3()
 {
@@ -107,6 +109,25 @@ Vector3& Vector3::operator =(const Vector3& v)
 	x = v.x;
 	y = v.y;
 	z = v.z;
+}
+
+float& Vector3::operator[] (const int& index)
+{
+	assert(index >= 0 && index < 3);
+	switch (index){
+		case 0:
+	        return x;
+            break;
+		case 1:
+			return y;
+			break;
+		case 2:
+			return z;
+			break;
+		default:
+			// should not visit this
+			std::cout<<"error! in Point3::operator[]"<<std::endl;
+	}
 }
 
 float Vector3::dot(const Vector3& v) const

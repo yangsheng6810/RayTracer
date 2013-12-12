@@ -17,6 +17,7 @@ public:
 	float operator *(const Vector3& v) const;
     Vector3& operator *=(const float& v);
 	Vector3& operator =(const Vector3& v);
+	float& operator[] (const int& index);
     float dot(const Vector3& v) const;
     Vector3 tensor(const Vector3& v) const;
 	void normalize();
@@ -26,6 +27,8 @@ public:
 	std::string toString() const;
 
 	float x, y, z;
+	// used for random
+	static unsigned short Xi[3];
 };
 
 Vector3 operator +(const Vector3& v1, const Vector3& v2);
