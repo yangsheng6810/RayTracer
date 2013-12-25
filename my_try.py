@@ -65,7 +65,7 @@ def render(addon, context, data):
     addCamera()
     #librender.set_python_callback(callback)
     setParameters(addon)
-    L.set_sample(10)
+    L.set_sample(1000)
     addon.thread_num = L.get_thread_num()
     addObjects(addon, context, data)
     L.render_scene()
