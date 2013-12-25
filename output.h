@@ -29,6 +29,7 @@ public:
 
 private:
 	boost::shared_ptr<color_array_type> image;
+	boost::shared_ptr<color_array_type> image_pool;
 	boost::shared_ptr<number_array_type> sample;
 	mutable boost::mutex mutex_read;
 	mutable boost::mutex mutex_write;

@@ -13,6 +13,7 @@ Output::Output(int ww, int hh):
 	// rgb8_pixel_t black(0, 0, 0);
     // fill_pixels(view(img), black);
 	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
+	image_pool = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
     sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
 	img = rgb8_image_t(width, height);
 	v = boost::gil::view(img);
@@ -20,7 +21,8 @@ Output::Output(int ww, int hh):
 	for (int i = 0; i < width; ++i)
 		for(int j = 0; j < height; ++j){
 	        (*image)[j][i] = c;
-	        (*image)[j][i] = 0;
+	        (*image_pool)[j][i] = c;
+	        (*sample)[j][i] = 0;
 		}
 
 	namespace fs = boost::filesystem;
@@ -40,6 +42,7 @@ void Output::setResolution(int width_, int height_)
 	width = width_;
 	height = height_;
 	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
+	image_pool = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
     sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
 	img = rgb8_image_t(width, height);
 	v = boost::gil::view(img);
@@ -52,11 +55,17 @@ void Output::writePic() const
 	ofs << "P6\n" << width << " " << height << "\n255\n";
 	for (unsigned i = 0; i < height; ++i)
 		for(unsigned j = 0; j < width; ++j){
+			/*
     		ofs << (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255) <<
 	    	(unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255) <<
 		    (unsigned char)((*image)[i][j].b / (*sample)[i][j] * 255);
+			*/
+    		ofs << (unsigned char)((*image)[i][j].r * 255) <<
+	    	(unsigned char)((*image)[i][j].g * 255) <<
+		    (unsigned char)((*image)[i][j].b * 255);
 	    }
 	ofs.close();
+	/*
 	for (unsigned i = 0; i < height; ++i)
 		for(unsigned j = 0; j < width; ++j)
     		v(j,i) = rgb8_pixel_t(
@@ -64,6 +73,7 @@ void Output::writePic() const
 			             (unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255),
             		     (unsigned char)((*image)[i][j].b / (*sample)[i][j] * 255));
 	png_write_view("untitled.png", const_view(img));
+	*/
 }
 
 std::vector<Color> Output::getTile(int x_start, int y_start, int width, int height) const
@@ -87,11 +97,18 @@ void Output::outputTile(int x_start, int y_start, int width, int height) const
 	int x_end = x_start + width;
 	int y_end = y_start + height;
 	for (unsigned i = y_start; i < y_end; ++i )
-		for(unsigned j = x_start; j < x_end; ++j )
+		for(unsigned j = x_start; j < x_end; ++j ){
+			/*
 			my_view(j - x_start,i - y_start) = rgb8_pixel_t(
 			             (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255),
 			             (unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255),
             		     (unsigned char)((*image)[i][j].b / (*sample)[i][j] * 255));
+						 */
+			my_view(j - x_start,i - y_start) = rgb8_pixel_t(
+			             (unsigned char)((*image)[i][j].r * 255),
+			             (unsigned char)((*image)[i][j].g * 255),
+            		     (unsigned char)((*image)[i][j].b * 255));
+		}
 	std::ostringstream strs;
 	strs<<"/tmp/yang-blender/"<<x_start<<"-"<<y_start<<".png";
 	std::string str = strs.str();
@@ -102,8 +119,11 @@ void Output::addColor(Color c, int x, int y)
 {
     boost::mutex::scoped_lock lock_r(mutex_read);
     boost::mutex::scoped_lock lock_w(mutex_write);
-	c.toRealColor();
-	(*image)[y][x] += c.toRealColor();
+	// c.toRealColor();
+	(*image_pool)[y][x] = (*image_pool)[y][x] + c;
 	(*sample)[y][x] += 1;
+	Color c1 = (*image_pool)[y][x];
+	c1.divide((*sample)[y][x]);
+	(*image)[y][x] = c1.toRealColor();
 	// v(y, x) = rgb8_pixel_t(c.r, c.g, c.b);
 }
