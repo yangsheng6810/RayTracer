@@ -63,12 +63,13 @@ float Vector3::operator *(const Vector3& v) const
 	return (float)(x * v.x + y * v.y + z * v.z);
 }
 
-void Vector3::normalize()
+Vector3 &Vector3::normalize()
 {
 	double n = sqrt(lenSquare());
 	x = x/n;
 	y = y/n;
 	z = z/n;
+	return *this;
 }
 
 Vector3 operator +(const Vector3& v1, const Vector3& v2)

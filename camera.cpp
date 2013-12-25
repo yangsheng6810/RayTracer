@@ -24,10 +24,10 @@ void Camera::setVectors(Vector3 v1_, Vector3 v2_, Vector3 v3_, Vector3 v4_)
 
 void Camera::generateVectors(Vector3 direction)
 {
-	Vector3 xx = direction.tensor(Vector3(0, 0, 1));
-	xx.normalize();
-	Vector3 yy = - direction.tensor(xx);
-	yy.normalize();
+	Vector3 xx = direction.tensor(Vector3(0, 0, 1)).normalize();
+	// xx.normalize();
+	Vector3 yy = - direction.tensor(xx).normalize();
+	// yy.normalize();
 	double ratio = height * 1.0/width;
 	v1 = direction - xx + yy * ratio;
 	v2 = direction + xx + yy * ratio;
@@ -37,7 +37,7 @@ void Camera::generateVectors(Vector3 direction)
 
 Ray Camera::getRay(int x, int y) const
 {
-	Ray r = Ray();
+	Ray r;
 	r.o = origin;
 	double p1, p2;
 	p1 = (x + rand_float() - 0.5) * inv_w;

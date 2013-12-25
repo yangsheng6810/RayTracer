@@ -6,6 +6,8 @@
 
 BBox::BBox()
 {
+    min = Point3(FLT_MAX, FLT_MAX, FLT_MAX);
+    max = Point3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 }
 
 BBox::BBox(const Point3& min_, const Point3& max_):

@@ -20,7 +20,7 @@ public:
 	float& operator[] (const int& index);
     float dot(const Vector3& v) const;
     Vector3 tensor(const Vector3& v) const;
-	void normalize();
+	Vector3& normalize();
 	void addNoise();
 	double lenSquare() const;
 
