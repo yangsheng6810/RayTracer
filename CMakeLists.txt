@@ -8,6 +8,7 @@ set(MY_SOURCES
 		vector3.cpp
 		color.cpp
         bbox.cpp
+        threadpool.h
         sahkdtree.cpp
         triangle.cpp
         light.cpp
