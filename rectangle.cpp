@@ -6,8 +6,8 @@ Rectangle::Rectangle(const Point3& p_, const Vector3& a_,
 {
 	a_lenSquare = a.lenSquare();
 	b_lenSquare = b.lenSquare();
-	normal = a.tensor(b);
-	normal.normalize();
+	normal = a.tensor(b).normalize();
+	// normal.normalize();
 	bBox.extends(p0);
 	bBox.extends(p0 + a);
 	bBox.extends(p0 + b);
@@ -39,6 +39,7 @@ bool Rectangle::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 	sp.hit = true;
 	sp.normal = normal * ray.d < 0 ? normal : -normal;
 	// sp.normal = normal;
+	sp.inside = false;
 	sp.hitPoint = p;
 	sp.m = *m_ptr;
 	// sp.m.Kd = Color(0.8);
@@ -49,6 +50,9 @@ bool Rectangle::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 
 bool Rectangle::shadow_hit(const Ray &ray, double &tmin) const
 {
+	// potential problem!!
+	if (m_ptr->emission > 0)
+		return false;
 	float t = Vector3(ray.o, p0) * normal / (ray.d * normal);
 
 	if (t <= kEpsilon)

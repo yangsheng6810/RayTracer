@@ -18,7 +18,7 @@ public:
 	         double power_ = 100,
 	         bool reflect_ = false,
 	         bool transparent_ = false,
-	         bool isLight_ = false);
+	         Color emission_ = Color(0));
 	Material(const Material& m);
 	Material& operator = (const Material& m);
 	std::string toString() const;
@@ -29,6 +29,7 @@ public:
 	bool transparent;
 	bool reflect;
 	bool isLight;
+	Color emission;
 	boost::shared_ptr<Light> light_ptr;
 };
 
