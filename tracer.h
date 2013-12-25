@@ -10,11 +10,14 @@
 class Tracer
 {
 public:
+	enum RenderType {GLOBAL, LIMITED, DIRECT};
 	Tracer();
 	void setScene(const boost::shared_ptr<Scene>& s_ptr);
 
 	virtual Color trace_ray(const Ray& ray, float weight) const;
 	boost::weak_ptr<Scene> scene_weak_ptr;
+	void setRenderType(const RenderType& rt_);
+	RenderType type;
 
 };
 
