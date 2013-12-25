@@ -26,7 +26,8 @@ int main()
 	cout << "Hello RayTracer!" << endl;
 	// sleep(10);
 	// scene->stopAllThreads();
-	sleep(1000);
+	sleep(10000);
+	cout << "stopped in main after sleep"<<endl;
 	return 0;
 }
 
