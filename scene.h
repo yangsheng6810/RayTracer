@@ -16,6 +16,7 @@
 #include <boost/thread/mutex.hpp>
 
 class Tracer;
+class ThreadPool;
 
 class Scene:
         public boost::enable_shared_from_this<Scene>
@@ -62,12 +63,14 @@ public:
 
 	boost::scoped_ptr<Output> output;
 	boost::scoped_ptr<Tracer> tracer_ptr;
-	boost::threadpool::pool pool;
+	// boost::threadpool::pool pool;
+    boost::shared_ptr<ThreadPool> pool;
 	boost::thread waitingThread;
 	boost::function<void()> callback;
 	mutable boost::mutex mutex_update;
 	bool running;
 	mutable boost::mutex mutex_running;
+	mutable boost::mutex mutex_count;
 };
 
 #endif // SCENE_H

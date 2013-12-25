@@ -1,4 +1,5 @@
 #include "scene.h"
+#include "threadpool.h"
 #include "tracer.h"
 #include "material.h"
 #include "rectangle.h"
@@ -13,24 +14,27 @@
 
 using namespace boost;
 
+int count = 0;
+
 Scene::Scene(int w, int h):
     width(w),
     height(h),
     sample(1),
     sendTile(NULL),
 	output(new Output(w, h)),
-	tracer_ptr(new Tracer())
+	tracer_ptr(new Tracer()),
+	pool(new ThreadPool(4))
 {
 	// temporarily!
 	// sample = 100;
-	sample = 100;
+	sample = 200;
 	buildScene();
 	inv_w = 1.0/width;
 	inv_h = 1.0/height;
 	fov = 30;
 	aspectratio = (double) width / height;
 	angle = tan(M_PI * 0.5 * fov / (double)180);
-	pool = boost::threadpool::pool(4);
+	// pool = boost::threadpool::pool(4);
 	running = false;
 	row_number = 6;
 	col_number = 8;
@@ -51,11 +55,11 @@ void Scene::buildScene()
     	            Color(0.2),
     	            Color(0.1),
     	            Color(0.3),
-	                0.4,
+	                0.8,
     	            0.2,
     	            100,
     	            true,
-    	            true));
+    	            false));
 	shared_ptr<Material> m_sphere2(
 	            new Material(
 	                Color(178.0/255, 255.0/255, 77.0/255),
@@ -63,14 +67,14 @@ void Scene::buildScene()
 	                Color(0.2),
 	                Color(0.3),
     	            Color(0.3),
-	                0.6,
+	                0.8,
 	                0.2,
 	                100,
 	                true,
 	                false));
 	shared_ptr<Material> m_sphere3(
 	            new Material(
-	                Color(0.8),
+	                Color(1),
 	                // Color(0.2),
 	                Color(0.2),
 	                Color(0.1),
@@ -93,14 +97,14 @@ void Scene::buildScene()
 	                false));
 	shared_ptr<Material> m_ground(
 	            new Material(
-	                Color(0.8),
+	                Color(0.6),
 	                Color(0.2),// should be 0.8
 	                Color(0.1),
     	            Color(0.3),
 	                0.4,
 	                0.2,
 	                100,
-	                true,
+	                false,
 	                false));
 	shared_ptr<Material> m_background(
 	            new Material(
@@ -111,9 +115,9 @@ void Scene::buildScene()
 	                0.4,
 	                0.3,
 	                100,
-	                true,
+	                false,
 	                false));
-	shared_ptr<Material> m_rect(
+	shared_ptr<Material> m_rect1(
 	            new Material(
 	                Color(0.8),
     	            Color(0.4),
@@ -122,9 +126,22 @@ void Scene::buildScene()
 	                0.9,
     	            0.1,
     	            100,
-    	            true,
-    	            false));
+    	            false,
+    	            false,
+	                Color(1)));
 
+	shared_ptr<Material> m_rect2(
+	            new Material(
+	                Color(0.8),
+    	            Color(0.4),
+    	            Color(0.2),
+    	            Color(0),
+	                0.9,
+    	            0.1,
+    	            100,
+    	            false,
+    	            false,
+	                Color(10)));
 	objects.clear();
 	shared_ptr<Sphere> s;
 	/*
@@ -178,19 +195,19 @@ void Scene::buildScene()
 	// objects.push_back(shared_ptr<BaseObject>(rr));
 	
 	shared_ptr<Rectangle> rl =
-	        shared_ptr<Rectangle>(new Rectangle(Point3(-10, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 6), m_rect));
-	// objects.push_back(shared_ptr<BaseObject>(rl));
+	        shared_ptr<Rectangle>(new Rectangle(Point3(-10, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 6), m_rect2));
+	objects.push_back(shared_ptr<BaseObject>(rl));
 	//
 	shared_ptr<Rectangle> rr =
-	        shared_ptr<Rectangle>(new Rectangle(Point3(12, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 12), m_rect));
-	// objects.push_back(shared_ptr<BaseObject>(rr));
+	        shared_ptr<Rectangle>(new Rectangle(Point3(12, 0, 1), Vector3(0, -6, 0), Vector3(0, 0, 12), m_rect1));
+	objects.push_back(shared_ptr<BaseObject>(rr));
 
 
 	lights.clear();
 	shared_ptr<Light> l;
 
-	Vector3 light_vec = Vector3(1, -2, 1);
-	light_vec.normalize();
+	Vector3 light_vec = Vector3(1, -2, 1).normalize();
+	// light_vec.normalize();
 	// l = shared_ptr<Light>(new Parallel(light_vec, 5, Color(1.0)));
 	// l = shared_ptr<Light>(new PointLight(Point3(-12, -9, 9), 220, Color(1.0)));
 	// lights.push_back(l);
@@ -218,12 +235,23 @@ void Scene::renderScene()
 	int tile_width = width / col_number;
 
 	running = true;
+	count = 0;
+	int ccount = 0;
 
 	// sample
 	for(int sample_i = 0; sample_i != sample; sample_i++)
 	for (int i=0; i < height; i += tile_height)
 		for (int j = 0; j < width; j += tile_width){
+			/*
+			std::cout<<ccount<<std::endl;
+            ccount++;
+			*/
+			/*
 			pool.schedule(boost::bind(&Scene::renderTile, this, i, j,
+			                   i + tile_height < height ? i + tile_height : height,
+		                       j + tile_width  < width  ? j + tile_width  : width));
+							   */
+			pool->enqueue(boost::bind(&Scene::renderTile, this, i, j,
 			                   i + tile_height < height ? i + tile_height : height,
 		                       j + tile_width  < width  ? j + tile_width  : width));
     }
@@ -248,6 +276,7 @@ void Scene::setCallback(boost::function<void()> f)
 
 void Scene::stopAllThreads()
 {
+	/*
 	pool.clear();
 	if (true){
 	    boost::mutex::scoped_lock lock(mutex_running);
@@ -255,11 +284,12 @@ void Scene::stopAllThreads()
 	}
 	pool.wait(0);
 	std::cout<<"All threads stopped"<<std::endl;
+	*/
 }
 
 void Scene::waiting()
 {
-	pool.wait(0);
+	pool->wait(0);
 	callback();
 }
 
@@ -275,37 +305,79 @@ void Scene::setResolution(int width_, int height_)
 		output->setResolution(width, height);
 }
 
+bool isBlack(const Color& c)
+{
+	return fabs(c.r) + fabs(c.g) + fabs(c.b) < 0.01;
+}
+
+double difference(const Color& c1, const Color& c2)
+{
+	return fabs(c1.r - c2.r)
+	        + fabs(c1.g - c2.g)
+	        + fabs(c1.b - c2.b);
+}
+
 void Scene::renderTile(int z_start, int x_start, int z_end, int x_end) const
 {
 	Color color;
 	Ray ray;
+	int index = 0;
+	/*
+	std::vector<Color> tileColor = output->getTile(x_start,
+	                                               z_start,
+	                                               x_end - x_start,
+	                                               z_end - z_start);
+												   */
 
 	try{
 		for(int z = z_start; z < z_end; z++){
 			for(int x = x_start; x < x_end; x++){
 				// color = Color(0.5);
 				color = Color(0, 0, 0);
+				/*
 				ray = camera->getRay(x, z);
 				ray.normalize();
-
 			    color += tracer_ptr->trace_ray(ray, 1);
+				*/
+				// for(int k = 0; k < 10; ++k){
+				    ray = camera->getRay(x, z);
+				    ray.normalize();
+			        color += tracer_ptr->trace_ray(ray, 1);
+				// }
+				// color.divide(10);
+				/*
+				if (index != 0
+				        && difference(tileColor[index], tileColor[index - 1]) > 0.1){
+				    ray = camera->getRay(x, z);
+				    ray.normalize();
+
+			        color += tracer_ptr->trace_ray(ray, 1);
+				    color.divide(2);
+				}
+				*/
 				output->addColor(color, x, z);
+				// index++;
 			}
 	    }
 		if (!running)
 		    return;
 		output->writePic();
-	    output->outputTile(x_start, z_start, x_end - x_start, z_end - z_start);
 		// std::cout<<"before calling sendTile"<<std::endl;
-		if (sendTile){
+		if (sendTile){// i.e. called by blender
 		    if (!running)
 		        return;
 			// std::cout<<"in if clause"<<std::endl;
+	        output->outputTile(x_start, z_start, x_end - x_start, z_end - z_start);
             boost::mutex::scoped_lock lock(mutex_update);
 			// std::cout<<"acquired lock"<<std::endl;
             sendTile(x_start, z_start, x_end - x_start, z_end - z_start);
 			// std::cout<<"after calling sendTile"<<std::endl;
 		} else {
+            boost::mutex::scoped_lock lock(mutex_count);
+			if (count % (row_number * col_number) == 0)
+			    std::cout<<"sample "<<count/(row_number * col_number)<<", total "<<sample<<std::endl;
+			// std::cout<<"sample "<< count <<", total "<<sample<<std::endl;
+			count++;
 			// come here when not with blender
 			// std::cout<<"sendTile not prepared!"<<std::endl;
 		}
@@ -353,17 +425,29 @@ void Scene::addObject()
     	            false));
 	shared_ptr<Material> m_sphere3(
 	            new Material(
-	                Color(0.8),
+	                Color(1),
 	                // Color(0.2),
-	                Color(0.8),
-	                Color(0.7),
+	                Color(0.2),
+	                Color(0.1),
     	            Color(0.3),
-	                0.05,
-	                0.1,
-	                100,
-	                true,
-	                true));
-	new_object = boost::shared_ptr<TriangleMesh>(new TriangleMesh(m_sphere3, true));
+	                1.0,
+	                0.0,
+	                1000,
+	                false,
+	                false));
+	shared_ptr<Material> m_sphere_t(
+            new Material(
+                Color(1),
+                // Color(0.2),
+                Color(0.2),
+                Color(0.1),
+   	            Color(0.3),
+                0.1,
+                0.1,
+                1000,
+                true,
+                true));
+	new_object = boost::shared_ptr<TriangleMesh>(new TriangleMesh(m_sphere_t, true));
 }
 
 void Scene::addVertice(const Point3& point, const Vector3& normal)
