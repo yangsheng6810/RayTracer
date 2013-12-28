@@ -24,6 +24,7 @@ public:
     template<class F>
     void enqueue(F f);
 	void wait(int i);
+	void clear();
     ~ThreadPool();
 private:
     // need to keep track of threads so we can join them
@@ -60,6 +61,11 @@ void ThreadPool::wait(int i)
 	work.reset();
 	for(size_t i = 0; i < workers.size(); ++i)
 		workers[i]->join();
+}
+
+void ThreadPool::clear()
+{
+	service.stop();
 }
 
 // the destructor joins all threads

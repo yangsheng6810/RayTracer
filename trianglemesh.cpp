@@ -3,12 +3,17 @@
 #include <boost/make_shared.hpp>
 #include <sstream>
 
-TriangleMesh::TriangleMesh(boost::shared_ptr<Material> m_, bool smooth_):
-    m_ptr(m_), kEpsilon(0.0001), smooth(smooth_)
+TriangleMesh::TriangleMesh(bool smooth_):
+    kEpsilon(0.0001), smooth(smooth_)
 {
 	x_min = y_min = z_min =  10000;
 	x_max = y_max = z_max = -10000;
 	tree_ptr = boost::shared_ptr<SAHKDTree>(new SAHKDTree());
+}
+
+void TriangleMesh::addMaterial(boost::shared_ptr<Material> m_)
+{
+	materials.push_back(m_);
 }
 
 bool TriangleMesh::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
@@ -91,7 +96,8 @@ bool TriangleMesh::shadow_hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray 
 	return true;
 }
 
-bool TriangleMesh::hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin, ShadePacket &sp) const
+bool TriangleMesh::hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray,
+                           double &tmin, ShadePacket &sp, size_t material_index) const
 {
 	Point3 v0 = vertices[v0_];
 	Point3 v1 = vertices[v1_];
@@ -135,7 +141,8 @@ bool TriangleMesh::hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, d
 		sp.normal.normalize();
 	}
 	// else is assigned in Triangle::hit
-	sp.m = *m_ptr;
+	// sp.m = *m_ptr;
+	sp.m = *(materials[material_index]);
 	sp.inside = (sp.normal * ray.d) > 0;
 	sp.hitPoint = ray.o + t * ray.d;
 
@@ -174,12 +181,12 @@ void TriangleMesh::updateLimit(const Point3 &p)
 		z_max = p.z;
 }
 
-void TriangleMesh::addFace(int v0, int v1, int v2)
+void TriangleMesh::addFace(size_t v0, size_t v1, size_t v2, size_t material_index)
 {
 	// faces.push_back(Face(v0, v1, v2));
 	Vector3 n = Vector3(vertices[v1], vertices[v0]).tensor(Vector3(vertices[v1], vertices[v2]));
 	n.normalize();
-	triangles.push_back(boost::shared_ptr<Triangle>(new Triangle(shared_from_this(), v0, v1, v2, n)));
+	triangles.push_back(boost::shared_ptr<Triangle>(new Triangle(shared_from_this(), v0, v1, v2, n, material_index)));
 }
 
 std::string TriangleMesh::toString() const

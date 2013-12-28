@@ -9,7 +9,6 @@
 #include "camera.h"
 #include <vector>
 #include <boost/function.hpp>
-#include "boost/threadpool.hpp"
 #include <boost/smart_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
@@ -24,7 +23,7 @@ class Scene:
 public:
 	Scene(int w = 640, int h = 480);
     void createTracer();
-	void buildScene();
+	void buildScene(bool withBlender = false);
     void addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4);
 
     void renderScene();
@@ -43,9 +42,10 @@ public:
 	void setGrid(int row_number_, int col_number_);
 	int getThreadNum();
 
-	void addObject();
+	void addObject(bool isSmooth = false);
+	void addMaterial(const boost::shared_ptr<Material>& m);
 	void addVertice(const Point3& point, const Vector3& normal);
-	void addFace(int v1, int v2, int v3);
+	void addFace(int v1, int v2, int v3, size_t material_index);
 	void finishObject();
 	boost::shared_ptr<TriangleMesh> new_object;
 

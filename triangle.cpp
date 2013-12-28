@@ -2,18 +2,19 @@
 #include "triangle.h"
 
 Triangle::Triangle(const boost::shared_ptr<TriangleMesh>& obj_ptr,
-                   size_t v0_, size_t v1_, size_t v2_, const Vector3& normal_):
+                   size_t v0_, size_t v1_, size_t v2_, const Vector3& normal_, size_t material_index_):
     object_ptr(obj_ptr), v0(v0_), v1(v1_), v2(v2_), normal(normal_)
 {
 	bBox.extends(object_ptr->vertices[v0]);
 	bBox.extends(object_ptr->vertices[v1]);
 	bBox.extends(object_ptr->vertices[v2]);
+	material_index = material_index_;
 }
 
 bool Triangle::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 {
 	sp.normal = normal;
-    return object_ptr->hitFace(v0, v1, v2, ray, tmin, sp);
+    return object_ptr->hitFace(v0, v1, v2, ray, tmin, sp, material_index);
 }
 
 bool Triangle::shadow_hit(const Ray &ray, double &tmin) const

@@ -22,16 +22,19 @@ class TriangleMesh : public BaseObject,
         public boost::enable_shared_from_this<TriangleMesh>
 {
 public:
-	TriangleMesh(boost::shared_ptr<Material> m_ = boost::shared_ptr<Material>(), bool smooth_ = false);
+	// TriangleMesh(boost::shared_ptr<Material> m_ = boost::shared_ptr<Material>(), bool smooth_ = false);
+	TriangleMesh(bool smooth_ = false);
 	void addVertice(const Point3& p, const Vector3& v);
-	void addFace(int v0, int v1, int v2);
+	void addFace(size_t v0, size_t v1, size_t v2, size_t material_index);
+	void addMaterial(boost::shared_ptr<Material> m_);
 	void finishObject();
 	bool hit(const Ray &ray, double &tmin, ShadePacket &sp) const;
 	bool shadow_hit(const Ray &ray, double &tmin) const;
 	void shift(const Vector3& v);
 
 	bool shadow_hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin) const;
-	bool hitFace(size_t v0_, size_t v1, size_t v2_, const Ray &ray, double &tmin, ShadePacket &sp) const;
+	bool hitFace(size_t v0_, size_t v1, size_t v2_, const Ray &ray,
+	             double &tmin, ShadePacket &sp, size_t material_index) const;
 
 	std::string toString() const;
 	std::vector<Point3> vertices;
@@ -42,7 +45,8 @@ public:
 private:
 	void updateLimit(const Point3& p);
 	float x_min, x_max, y_min, y_max, z_min, z_max;
-	boost::shared_ptr<Material> m_ptr;
+	// boost::shared_ptr<Material> m_ptr;
+	std::vector<boost::shared_ptr<Material> > materials;
 	boost::shared_ptr<SAHKDTree> tree_ptr;
 	double kEpsilon;
 	bool smooth;

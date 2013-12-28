@@ -47,7 +47,7 @@ IF(Boost_FOUND)
 
     #find_package(Boost REQUIRED thread system)
 
-    add_definitions(-DWITH_SAMPLE_NUMBER=20)
+    #add_definitions(-DWITH_SAMPLE_NUMBER=20)
 	add_library(my-library SHARED ${MY_SOURCES})
 	target_link_libraries(my-library
             ${CMAKE_THREAD_LIBS_INIT}

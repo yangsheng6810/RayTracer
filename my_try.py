@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Vector
 import time
+from imp import reload
 import librender as L
 C = bpy.context
 D = bpy.data
@@ -31,13 +32,16 @@ def addObject(scene, ob):
     mesh = ob.to_mesh(scene, True, 'RENDER')
     matrix = ob.matrix_world
     L.add_object()
+    for material in mesh.materials:
+        L.add_material(material)
+    L.add_material(None)
     for v in mesh.vertices:
         L.add_vertice(matrix * v.co, matrix * v.normal)
     for p in mesh.polygons:
         p_vertices = p.vertices
         size = len(p_vertices)
         for j in range(1, size - 1):
-            L.add_face(p_vertices[0], p_vertices[j+1], p_vertices[j])
+            L.add_face(p_vertices[0], p_vertices[j+1], p_vertices[j], p.material_index)
     L.finish_object()
 
 def setParameters(addon):
@@ -65,7 +69,7 @@ def render(addon, context, data):
     addCamera()
     #librender.set_python_callback(callback)
     setParameters(addon)
-    L.set_sample(1000)
+    L.set_sample(100)
     addon.thread_num = L.get_thread_num()
     addObjects(addon, context, data)
     L.render_scene()

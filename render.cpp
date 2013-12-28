@@ -28,9 +28,50 @@ char const* add_objects(object s)
     return sstr;
 }
 
+Color get_color(object v)
+{
+	return Color(extract<double>(v.attr("r")),
+	             extract<double>(v.attr("g")),
+	             extract<double>(v.attr("b")));
+}
+
 void add_object()
 {
-	scene->addObject();
+	scene->addObject(true);
+}
+
+void add_material(object material)
+{
+	boost::shared_ptr<Material> m;
+	if (material.is_none()){
+		m = boost::shared_ptr<Material>(
+		            new Material(
+		                Color(0.8),
+		                // Color(0.2),
+		                Color(0.8),
+		                Color(0.7),
+			            Color(0.3),
+		                0.05,
+		                0.1,
+		                100,
+		                false,
+		                false));
+	} else {
+	    m = boost::shared_ptr<Material>(
+		        new Material(get_color(material.attr("diffuse_color")),
+	                      // get_color(material.attr("diffuse_intensity")),
+	                      Color(0.2),
+	                      get_color(material.attr("specular_color")),
+	                      Color(0),
+	                      extract<double>(material.attr("diffuse_intensity")),
+	                      extract<double>(material.attr("specular_intensity")),
+	                      extract<double>(material.attr("specular_hardness")),
+	                      extract<bool>(material.attr("raytrace_mirror").attr("use")),
+	                      extract<bool>(material.attr("use_transparency")),
+	                      Color(extract<double>(material.attr("emit")))
+	                      ));
+	}
+	scene->addMaterial(m);
 }
 
 void add_vertice(object point, object normal)
@@ -44,11 +85,12 @@ void add_vertice(object point, object normal)
 	scene->addVertice(c_point, c_normal);
 }
 
-void add_face(object v1, object v2, object v3)
+void add_face(object v1, object v2, object v3, object m_index)
 {
 	scene->addFace(extract<int>(v1),
 	               extract<int>(v2),
-	               extract<int>(v3));
+	               extract<int>(v3),
+	               extract<int>(m_index));
 }
 
 void finish_object()
@@ -200,8 +242,9 @@ BOOST_PYTHON_MODULE(librender)
 {
   def("yay", yay);
   def("add_object", add_object);
+  def("add_material", add_material, args("material"));
   def("add_vertice", add_vertice, args("point", "normal"));
-  def("add_face", add_face, args("v1", "v2", "v3"));
+  def("add_face", add_face, args("v1", "v2", "v3", "m_index"));
   def("finish_object", finish_object);
   def("get_thread_num", get_thread_num);
   def("add_objects", add_objects, args("s"), "try docstring");

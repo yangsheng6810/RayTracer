@@ -25,7 +25,7 @@ Vector3 RectLight::get_direction(const ShadePacket &sp) const
 	p = p + 0.5 * rect_ptr->a;
 	p = p + 0.5 * rect_ptr->b;
 #endif
-	Vector3 ret = Vector3(sp.hitPoint, p);
+	Vector3 ret = Vector3(sp.hitPoint, p); //.normalize();
 	return ret;
 }
 

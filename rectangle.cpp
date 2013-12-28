@@ -51,7 +51,7 @@ bool Rectangle::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 bool Rectangle::shadow_hit(const Ray &ray, double &tmin) const
 {
 	// potential problem!!
-	if (m_ptr->emission > 0)
+	if (m_ptr->emission.r > 0)
 		return false;
 	float t = Vector3(ray.o, p0) * normal / (ray.d * normal);
 

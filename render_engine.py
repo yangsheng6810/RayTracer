@@ -20,7 +20,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
         self.thread_count = 0;
         import sys
         from imp import reload
-        sys.path.append('/home/yangsheng/Documents/Homework/Graphics/3/Mine/RayTracer-build')
+        sys.path.append('/home/yangsheng/Documents/Homework/Graphics/3/Mine/RayTracer-try-build')
         import my_try
         self.render_engine = my_try
         self.finished = False
@@ -39,6 +39,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
 
         if scene.name == 'preview':
             print("preview")
+            return
         #    self.render_preview(scene)
         else:
             print("render")
@@ -152,9 +153,11 @@ properties_data_camera.DATA_PT_camera.COMPAT_ENGINES.add('custom_renderer')
 properties_data_camera.DATA_PT_lens.COMPAT_ENGINES.add('custom_renderer')
 
 from bl_ui import properties_material
-properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('custom_renderer')
+from bl_ui import properties_material
+#properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('custom_renderer')
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('custom_renderer')
 properties_material.MATERIAL_PT_diffuse.COMPAT_ENGINES.add('custom_renderer')
 properties_material.MATERIAL_PT_specular.COMPAT_ENGINES.add('custom_renderer')
+properties_material.MATERIAL_PT_shading.COMPAT_ENGINES.add('custom_renderer')
 properties_material.MATERIAL_PT_transp.COMPAT_ENGINES.add('custom_renderer')
 del properties_material
