@@ -9,13 +9,11 @@ class Light;
 class Material
 {
 public:
-	Material(Color c_ = Color(0.8, 0, 0),
-	         Color Kd_ = Color(0.8),
-	         Color Ks_ = Color(0.7),
-	         Color environment_reflect_ = Color(0.1),
-			 double r_diffuse_ = 1.0,
-	         double r_reflect_ = 0,
-	         double power_ = 100,
+	Material(Color diffuse_color_ = Color(1.0, 0, 0),
+	         double diffuse_intensity_ = 0.5,
+	         Color specular_color_ = Color(0.8),
+	         double specular_intensity_ = 0.5,
+	         double hardness_ = 100,
 	         bool reflect_ = false,
 	         bool transparent_ = false,
 	         Color emission_ = Color(0));
@@ -23,9 +21,9 @@ public:
 	Material& operator = (const Material& m);
 	std::string toString() const;
 
+	Color diffuse_color, specular_color;
+	double diffuse_intensity, specular_intensity, hardness;
 	double r_diffuse, r_reflect;
-	Color color, environment_reflect, Kd, Ks;
-	double power;
 	bool transparent;
 	bool reflect;
 	bool isLight;
