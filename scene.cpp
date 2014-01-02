@@ -5,6 +5,7 @@
 #include "rectangle.h"
 #include "parallel.h"
 #include "pointlight.h"
+#include "spotlight.h"
 #include "rectlight.h"
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
@@ -28,7 +29,7 @@ Scene::Scene(int w, int h):
 	// temporarily!
 	// sample = 100;
 	sample = 200;
-	buildScene(true);
+	// buildScene(true);
 	inv_w = 1.0/width;
 	inv_h = 1.0/height;
 	fov = 30;
@@ -50,12 +51,9 @@ void Scene::buildScene(bool withBlender)
 {
 	shared_ptr<Material> m_sphere1(
 	            new Material(
-	                // Color(92.0/255, 228.0/255, 255.0/255),
 	                Color(255.0/255, 226.0/255, 190.0/255),
-    	            Color(0.2),
-    	            Color(0.1),
-    	            Color(0.3),
 	                0.4,
+	                Color(0.8),
     	            0.2,
     	            100,
     	            true,
@@ -63,11 +61,8 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_sphere2(
 	            new Material(
 	                Color(178.0/255, 255.0/255, 77.0/255),
-	                // Color(0.2),
-	                Color(0.2),
-	                Color(0.3),
-    	            Color(0.3),
 	                0.6,
+	                Color(0.8),
 	                0.4,
 	                100,
 	                true,
@@ -75,11 +70,8 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_sphere3(
 	            new Material(
 	                Color(0.8),
-	                // Color(0.2),
-	                Color(0.2),
-	                Color(0.1),
-    	            Color(0.3),
 	                0.3,
+	                Color(0.8),
 	                0.5,
 	                1000,
 	                true,
@@ -87,10 +79,8 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_mesh(
 	            new Material(
 	                Color(255.0/255, 87.0/255, 87.0/255),
-	                Color(0.5),
-	                Color(0.8),
-    	            Color(0.3),
 	                0.6,
+	                Color(0.8),
 	                0.2,
 	                100,
 	                false,
@@ -98,10 +88,8 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_ground(
 	            new Material(
 	                Color(0.8),
-	                Color(0.2),// should be 0.8
-	                Color(0.1),
-    	            Color(0.3),
 	                0.4,
+	                Color(0.2),// should be 0.8
 	                0.2,
 	                100,
 	                true,
@@ -109,10 +97,8 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_background(
 	            new Material(
 	                Color(0.4),
-	                Color(0.2),
-	                Color(0.2),
-    	            Color(0.3),
 	                0.4,
+	                Color(0.2),
 	                0.3,
 	                100,
 	                false,
@@ -120,28 +106,22 @@ void Scene::buildScene(bool withBlender)
 	shared_ptr<Material> m_rect(
 	            new Material(
 	                Color(0.8),
-    	            Color(0.4),
-    	            Color(0.2),
-    	            Color(0),
 	                0.9,
+    	            Color(0.9),
     	            0.1,
     	            100,
     	            true,
-    	            false,
-	                Color(100)));
+    	            false));
 
 	shared_ptr<Material> m_rect2(
 	            new Material(
 	                Color(0.8),
-    	            Color(0.4),
-    	            Color(0.2),
-    	            Color(0),
 	                0.9,
+	                Color(0.9),
     	            0.1,
     	            100,
     	            false,
-    	            false,
-	                Color(10)));
+    	            false));
 	objects.clear();
 	if (!withBlender){
 	shared_ptr<Sphere> s;
@@ -214,10 +194,10 @@ void Scene::buildScene(bool withBlender)
 	// l = shared_ptr<Light>(new PointLight(Point3(-12, -9, 9), 220, Color(1.0)));
 	// lights.push_back(l);
 	l = shared_ptr<Light>(new RectLight(rl, 400, Color(1.0)));
-	lights.push_back(l);
+	// lights.push_back(l);
 
 	l = shared_ptr<Light>(new RectLight(rr, 160, Color(1.0)));
-	lights.push_back(l);
+	// lights.push_back(l);
 }
 
 void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
@@ -240,8 +220,10 @@ void Scene::renderScene()
 	count = 0;
 	int ccount = 0;
 
+	/*
 	if (!sendTile)
 		buildScene(false);
+		*/
 
 	// sample
 	for(int sample_i = 0; sample_i != sample; sample_i++)
@@ -418,4 +400,12 @@ void Scene::finishObject()
 	objects.push_back(new_object);
 	// like new_object = NULL;
 	new_object = boost::shared_ptr<TriangleMesh>();
+}
+
+
+void Scene::addLamp(Point3 location, Vector3 direction, Color color, double energy, double spot_size)
+{
+	std::cout<<"come to scene::addLamp"<<std::endl;
+    lights.push_back(shared_ptr<Light>(
+	                     new SpotLight(location, direction, color, energy, spot_size)));
 }

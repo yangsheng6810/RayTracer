@@ -47,29 +47,24 @@ void add_material(object material)
 		m = boost::shared_ptr<Material>(
 		            new Material(
 		                Color(0.8),
-		                // Color(0.2),
-		                Color(0.8),
-		                Color(0.7),
-			            Color(0.3),
 		                0.05,
+		                Color(0.9),
 		                0.1,
 		                100,
 		                false,
 		                false));
 	} else {
 	    m = boost::shared_ptr<Material>(
-		        new Material(get_color(material.attr("diffuse_color")),
-	                      // get_color(material.attr("diffuse_intensity")),
-	                      Color(0.2),
-	                      get_color(material.attr("specular_color")),
-	                      Color(0),
-	                      extract<double>(material.attr("diffuse_intensity")),
-	                      extract<double>(material.attr("specular_intensity")),
-	                      extract<double>(material.attr("specular_hardness")),
-	                      extract<bool>(material.attr("raytrace_mirror").attr("use")),
-	                      extract<bool>(material.attr("use_transparency")),
-	                      Color(extract<double>(material.attr("emit")))
-	                      ));
+		        new Material(
+		            get_color(material.attr("diffuse_color")),
+	                extract<double>(material.attr("diffuse_intensity")),
+	                get_color(material.attr("specular_color")),
+	                extract<double>(material.attr("specular_intensity")),
+	                extract<double>(material.attr("specular_hardness")),
+	                extract<bool>(material.attr("raytrace_mirror").attr("use")),
+	                extract<bool>(material.attr("use_transparency")),
+	                Color(extract<double>(material.attr("emit")))
+	                ));
 	}
 	scene->addMaterial(m);
 }
@@ -170,6 +165,7 @@ char const* new_scene(PyObject *engine)
 
 void callback()
 {
+	scene = boost::shared_ptr<Scene>();
 	std::cout<<"Success!"<<std::endl;
 }
 
@@ -205,6 +201,15 @@ void add_camera(object location, object p1, object p2, object p3, object p4)
 	                 Vector3(loc, point2),
 	                 Vector3(loc, point3),
 	                 Vector3(loc, point4));
+}
+
+void add_lamp(object location, object direction, object color, object energy, object spot_size)
+{
+	scene->addLamp(get_point(location),
+	               get_vect(direction),
+	               get_color(color),
+	               extract<double>(energy),
+	               extract<double>(spot_size));
 }
 
 void stop_render()
@@ -245,6 +250,7 @@ BOOST_PYTHON_MODULE(librender)
   def("add_material", add_material, args("material"));
   def("add_vertice", add_vertice, args("point", "normal"));
   def("add_face", add_face, args("v1", "v2", "v3", "m_index"));
+  def("add_lamp", add_lamp, args("location", "direction", "color", "energy", "spot_size"));
   def("finish_object", finish_object);
   def("get_thread_num", get_thread_num);
   def("add_objects", add_objects, args("s"), "try docstring");

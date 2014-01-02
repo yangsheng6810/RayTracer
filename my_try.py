@@ -44,6 +44,16 @@ def addObject(scene, ob):
             L.add_face(p_vertices[0], p_vertices[j+1], p_vertices[j], p.material_index)
     L.finish_object()
 
+def addLamp(scene, lamp):
+    location = lamp.location
+    data = lamp.data
+    matrix = lamp.matrix_world
+    v = Vector()
+    v.z = 1.0
+    direction = -(matrix * v)
+    if data.type == 'SPOT':
+        L.add_lamp(location, direction, data.color, data.energy, data.spot_size)
+
 def setParameters(addon):
     L.set_resolution(addon.size_x, addon.size_y)
 
@@ -60,7 +70,15 @@ def addObjects(addon, context, data):
     for obj in objs:
         addObject(context.scene, obj)
 
-def render(addon, context, data):
+def is_light(scene, ob):
+    return (ob.is_visible(scene) and not ob.hide_render and ob.type in {'LAMP'})
+
+def addLamps(addon, context, data):
+    lamps = [l for l in context.scene.objects if is_light(context.scene, l)]
+    for l in lamps:
+        addLamp(context.scene, l)
+
+def render(addon, context, data, sample_number):
     print("here!")
     C = context
     D = data
@@ -69,9 +87,10 @@ def render(addon, context, data):
     addCamera()
     #librender.set_python_callback(callback)
     setParameters(addon)
-    L.set_sample(100)
+    L.set_sample(sample_number)
     addon.thread_num = L.get_thread_num()
     addObjects(addon, context, data)
+    addLamps(addon, context, data)
     L.render_scene()
     #time.sleep(30)
     #L.stop_render()

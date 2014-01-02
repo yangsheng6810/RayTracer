@@ -45,7 +45,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
             print("render")
         #    self.render_scene(scene)
         #self.thread_num = self.render_engine.get_thread_num()
-        self.render_engine.render(self, bpy.context, bpy.data)
+        self.render_engine.render(self, bpy.context, bpy.data, 100)
         print("before sleep")
         while True:
             if self.test_break():
@@ -71,7 +71,8 @@ class CustomRenderEngine(bpy.types.RenderEngine):
         #print("width is ", width)
         #print("height is ", height)
         result = self.begin_result(x_start, self.size_y - y_start - height, width, height)
-        file_str = "/tmp/yang-blender/%d-%d.png" % (x_start, y_start)
+        #file_str = "/tmp/yang-blender/%d-%d.png" % (x_start, y_start)
+        file_str = "/tmp/yang-blender/%d-%d.tiff" % (x_start, y_start)
         layer = result.layers[0]
         count = 0
         while True:
@@ -88,6 +89,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
             time.sleep(1)
         try:
             layer.load_from_file(file_str)
+            #result.load_from_file(file_str)
         except RuntimeError:
             print("runtime error in loading")
         self.end_result(result)

@@ -47,6 +47,7 @@ public:
 	void addVertice(const Point3& point, const Vector3& normal);
 	void addFace(int v1, int v2, int v3, size_t material_index);
 	void finishObject();
+	void addLamp(Point3 location, Vector3 direction, Color color, double energy, double spot_size);
 	boost::shared_ptr<TriangleMesh> new_object;
 
 	boost::function<void (int, int, int, int)> sendTile;
