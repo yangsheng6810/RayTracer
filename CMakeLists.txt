@@ -14,6 +14,7 @@ set(MY_SOURCES
         light.cpp
         parallel.cpp
         pointlight.cpp
+        spotlight.cpp
         rectlight.cpp
 		baseobject.cpp
 		sphere.cpp
