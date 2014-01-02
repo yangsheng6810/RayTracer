@@ -10,7 +10,6 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/gil/gil_all.hpp>
-#include <boost/gil/extension/io/png_dynamic_io.hpp>
 
 typedef boost::multi_array<Color, 2> color_array_type;
 typedef boost::multi_array<int, 2> number_array_type;

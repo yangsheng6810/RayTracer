@@ -1,8 +1,9 @@
 #include <fstream>
 #define BOOST_SYSTEM_NO_LIB
 #define BOOST_FILESYSTEM_NO_LIB
-#include <boost/filesystem.hpp>
 #include "output.h"
+#include <boost/filesystem.hpp>
+#include <boost/gil/extension/io/png_dynamic_io.hpp>
 using namespace boost::gil;
 
 Output::Output(int ww, int hh):
@@ -72,7 +73,7 @@ void Output::writePic() const
 			             (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255),
 			             (unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255),
             		     (unsigned char)((*image)[i][j].b / (*sample)[i][j] * 255));
-	png_write_view("untitled.png", const_view(img));
+    png_write_view("untitled.png", const_view(img));
 	*/
 }
 
