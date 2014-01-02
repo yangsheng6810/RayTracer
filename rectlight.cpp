@@ -5,7 +5,7 @@ RectLight::RectLight(boost::shared_ptr<Rectangle> rect_ptr_, float ls_, Color co
     Light(), rect_ptr(rect_ptr_), ls(ls_), color(color_)
 {
 	rect_ptr->m_ptr->isLight = true;
-	rect_ptr->m_ptr->color = ls * color;
+	rect_ptr->m_ptr->diffuse_color = ls * color;
 	need_sample = true;
 	srand(12458);
 }

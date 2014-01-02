@@ -21,7 +21,7 @@ bool Plane::hit(const Ray &ray, double &tmin, ShadePacket &sp) const
 		// sp.color = color;
 		sp.inside = false;
 		sp.m = *m_ptr;
-		sp.m.color = getColor(sp.hitPoint);
+		sp.m.diffuse_color = getColor(sp.hitPoint);
 		// std::cout << sp.color.toString() << std::endl;
 
 		return true;
@@ -65,5 +65,5 @@ Color Plane::getColor(Point3 p) const
 	    else
 		    return Color(0.6);
 	} else
-		return m_ptr->color;
+		return m_ptr->diffuse_color;
 }

@@ -4,7 +4,7 @@
 
 Sphere::Sphere(const Point3 &p, const double &rr,
                boost::shared_ptr<Material> m):
-    origin(p), radius(rr), m_ptr(m), kEpsilon(0.001/rr)
+    origin(p), radius(rr), m_ptr(m), kEpsilon(0.0001 * rr)
     // transparency(0), reflection(0.8)
 {
 	bBox.extends(p + Vector3(rr, rr, rr));
