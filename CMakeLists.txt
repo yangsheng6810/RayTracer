@@ -89,7 +89,7 @@ ENDIF()
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
   #ADD_DEFINITIONS("-Wall")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -std=c++03")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fno-omit-frame-pointer -ffast-math -std=c++03")
 ELSE()
   MESSAGE(FATAL_ERROR "CMakeLists.txt has not been tested/written for your compiler.")
 ENDIF()

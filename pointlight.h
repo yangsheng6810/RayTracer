@@ -7,7 +7,7 @@ class PointLight : public Light
 public:
 	PointLight();
 	PointLight(Point3 point_, float ls_, Color color_);
-	Vector3 get_direction(const ShadePacket &sp) const;
+	Vector3 get_direction(const ShadePacket &sp, int sample_n);
 	Color L(const ShadePacket &sp);
 
 private:

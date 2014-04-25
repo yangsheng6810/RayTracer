@@ -8,7 +8,7 @@ class Light
 {
 public:
 	Light();
-	virtual Vector3 get_direction(const ShadePacket& sp) const= 0;
+	virtual Vector3 get_direction(const ShadePacket& sp, int sample_n) = 0;
 	virtual Color L(const ShadePacket& sp) = 0;
 	bool need_sample;
 

@@ -8,12 +8,14 @@
 #include <vector>
 #include <boost/smart_ptr.hpp>
 #include <boost/python.hpp>
+#include <boost/thread.hpp>
 using namespace boost::python;
 
 boost::shared_ptr<Scene> scene;
 PyObject *renderEngine;
 PyObject *pythonCallback;
 PyObject *pythonAddTile;
+boost::thread waitingThread;
 int total_sample = 0;
 
 char const* yay()
@@ -67,6 +69,7 @@ void add_material(object material)
 	                ));
 	}
 	scene->addMaterial(m);
+	m.reset();
 }
 
 void add_vertice(object point, object normal)
@@ -134,11 +137,6 @@ std::string parse_python_exception(){
 
 void addTile(int x_start, int y_start, int width, int height)
 {
-	/*
-	tryClass *tt = new tryClass(x_start, y_start, width, height, data, is_final);
-	delete tt;
-	tt = NULL;
-	*/
 	// std::cout<<"Before calling back!"<<std::endl;
 	PyEval_InitThreads();
 
@@ -153,9 +151,24 @@ void addTile(int x_start, int y_start, int width, int height)
 	// std::cout<<"After calling back!"<<std::endl;
 }
 
+void send_success()
+{
+	PyEval_InitThreads();
+
+    PyGILState_STATE state = PyGILState_Ensure();
+    try{
+        call_method<void>(renderEngine, "success");
+    }catch(boost::python::error_already_set const &){
+        std::string perror_str = parse_python_exception();
+        std::cout << "Error in Python: " << perror_str << std::endl;
+    }
+    PyGILState_Release(state);
+}
+
 char const* new_scene(PyObject *engine)
 {
-	scene = boost::shared_ptr<Scene>(new Scene(1366, 678));
+	// scene = boost::shared_ptr<Scene>(new Scene(1366, 678));
+	scene.reset(new Scene(1366, 678));
 	renderEngine = engine;
 	Py_INCREF(renderEngine);
 
@@ -165,8 +178,12 @@ char const* new_scene(PyObject *engine)
 
 void callback()
 {
-	scene = boost::shared_ptr<Scene>();
+	// scene = boost::shared_ptr<Scene>();
+	std::cout<<"count of scene is "<<scene.use_count()<<std::endl;
+	Py_DECREF(renderEngine);
+	std::cout<<"clear scene in callback!"<<std::endl;
 	std::cout<<"Success!"<<std::endl;
+	send_success();
 }
 
 char const* render_scene(void)
@@ -214,7 +231,12 @@ void add_lamp(object location, object direction, object color, object energy, ob
 
 void stop_render()
 {
-	scene->stopAllThreads();
+	if (scene)
+	    scene->stopAllThreads();
+	// scene = boost::shared_ptr<Scene>();
+	// may not be a good idea
+	// scene.reset();
+	std::cout<<"clear scene!"<<std::endl;
 }
 
 void set_resolution(object width_, object height_)
@@ -243,6 +265,11 @@ void set_grid(object row_n, object col_n)
 	scene->setGrid(row_number, col_number);
 }
 
+void clear_scene()
+{
+	scene.reset();
+}
+
 BOOST_PYTHON_MODULE(librender)
 {
   def("yay", yay);
@@ -258,6 +285,7 @@ BOOST_PYTHON_MODULE(librender)
   def("new_scene",   new_scene, args("engine"));
   def("render_scene", render_scene);
   def("stop_render", stop_render);
+  def("clear_scene", clear_scene);
   def("set_resolution", set_resolution, args("width_", "height_"));
   def("set_sample", set_sample, args("sample_"));
   def("set_grid", set_grid, args("row_n", "col_n"));

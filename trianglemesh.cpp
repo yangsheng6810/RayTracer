@@ -4,14 +4,27 @@
 #include <sstream>
 
 TriangleMesh::TriangleMesh(bool smooth_):
-    kEpsilon(0.0001), smooth(smooth_)
+    BaseObject(), kEpsilon(0.0001), smooth(smooth_),
+	tree_ptr(new SAHKDTree())
 {
+	bBox = BBox();
 	x_min = y_min = z_min =  10000;
 	x_max = y_max = z_max = -10000;
-	tree_ptr = boost::shared_ptr<SAHKDTree>(new SAHKDTree());
 }
 
-void TriangleMesh::addMaterial(boost::shared_ptr<Material> m_)
+TriangleMesh::~TriangleMesh()
+{
+	vertices.clear();
+	normals.clear();
+	for (int i = 0; i < materials.size(); ++i)
+		materials[i].reset();
+	materials.clear();
+	for (int i = 0; i < triangles.size(); ++i)
+		triangles[i].reset();
+	triangles.clear();
+}
+
+void TriangleMesh::addMaterial(const boost::shared_ptr<Material>& m_)
 {
 	materials.push_back(m_);
 }

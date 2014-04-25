@@ -28,7 +28,6 @@ public:
 	bool reflect;
 	bool isLight;
 	Color emission;
-	boost::shared_ptr<Light> light_ptr;
 };
 
 #endif // MATERIAL_H

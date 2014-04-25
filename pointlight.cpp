@@ -10,7 +10,7 @@ PointLight::PointLight(Point3 point_, float ls_, Color color_):
 {
 }
 
-Vector3 PointLight::get_direction(const ShadePacket &sp) const
+Vector3 PointLight::get_direction(const ShadePacket &sp, int sample_n)
 {
 	Vector3 ret = Vector3(sp.hitPoint, point);
 	return ret;

@@ -26,6 +26,7 @@ Point3& Point3::operator = (const Point3& p)
 	x = p.x;
 	y = p.y;
 	z = p.z;
+	return *this;
 }
 
 float& Point3::operator[] (const int& index)

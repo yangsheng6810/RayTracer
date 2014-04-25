@@ -7,6 +7,15 @@ const int MAX_DEPTH = 100;
 
 SAHKDTree::SAHKDTree()
 {
+	sceneBox = BBox();
+}
+
+SAHKDTree::~SAHKDTree()
+{
+	m_nodes.clear();
+	for(int i = 0; i < m_leafData.size(); ++i)
+		m_leafData[i].reset();
+	m_leafData.clear();
 }
 
 void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects)
@@ -14,8 +23,10 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 	std::cout<<"in SAHKDTree::build"<<std::endl;
 	std::vector<BBox> objectBBoxes(objects.size());
 	BuildState curState;
-	curState.objects = new std::vector<size_t>;
-	sceneBox = BBox::empty();
+	curState.objects.reset(new std::vector<size_t>);
+	sceneBox = BBox();
+	for(int i = 0; i < objects.size(); ++i)
+		objectBBoxes[i] = BBox();
 
 	for(size_t i = 0; i < objectBBoxes.size(); ++i){
 		objectBBoxes[i] = objects[i]->getBBox();
@@ -54,7 +65,8 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 			for(int i = 0; i < curState.objects->size(); ++i){
 				m_leafData.push_back(objects[(*curState.objects)[i]]);
 			}
-			delete curState.objects;
+			// delete curState.objects;
+			curState.objects.reset();
 
 			// as delimiter, same as
 			// m_leafData.push_back(NULL);
@@ -73,8 +85,8 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 		// create a new state for the right child
 		BuildState rightState;
 		rightState.volume = curState.volume.split(splitDim, splitVal);
-		rightState.objects = new std::vector<size_t>;
-		std::vector<size_t>* leftObjects = new std::vector<size_t>;
+		rightState.objects.reset(new std::vector<size_t>);
+		boost::shared_ptr<std::vector<size_t> > leftObjects(new std::vector<size_t>);
 
 		++curState.depth;
 		rightState.depth = curState.depth;
@@ -101,8 +113,9 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 			}
 		}
 
-		delete curState.objects;
+		// delete curState.objects;
 		curState.objects = leftObjects;
+		leftObjects.reset();
 
 		m_nodes[curState.nodeIndex].dataIndex = m_nodes.size();
 		m_nodes[curState.nodeIndex].dimension = splitDim;
@@ -255,7 +268,7 @@ bool compE(SAHKDTree::SortElem e1, SAHKDTree::SortElem e2)
 
 
 SAHKDTree::KDPlane SAHKDTree::findPlane
-(std::vector<size_t>* objects_, BBox volume, std::vector<BBox> &triBoxes)
+(const boost::shared_ptr<std::vector<size_t> > &objects_, BBox volume, std::vector<BBox> &triBoxes)
 {
 
     //Splitting plane. By default the splitting plane must tell us that no

@@ -13,6 +13,7 @@ class SAHKDTree
 {
 public:
 	SAHKDTree();
+	~SAHKDTree();
     /// Builds the hierarchy over a set of bounded primitives
     void build(const std::vector<boost::shared_ptr<BaseObject> >& objects);
 
@@ -32,7 +33,14 @@ public:
 	};
 
 	struct BuildState {
-		std::vector<size_t>* objects;
+		BuildState()
+		{}
+		~BuildState()
+		{
+            objects.reset();
+		}
+
+		boost::shared_ptr<std::vector<size_t> > objects;
         BBox volume;
 		size_t nodeIndex;
 		int depth;
@@ -99,7 +107,7 @@ public:
 	std::vector<Node> m_nodes;
 	std::vector<boost::shared_ptr<BaseObject> > m_leafData;
 
-	KDPlane findPlane(std::vector<size_t>* objects_, BBox volume_,
+	KDPlane findPlane(const boost::shared_ptr<std::vector<size_t> >& objects_, BBox volume_,
 	                  std::vector<BBox>& objectBBoxes);
 
 	/// SAH cost function. It returns the cost of the surface area.

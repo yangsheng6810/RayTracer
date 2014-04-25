@@ -27,13 +27,15 @@ public:
 	int width, height;
 
 private:
-	boost::shared_ptr<color_array_type> image;
-	boost::shared_ptr<color_array_type> image_pool;
-	boost::shared_ptr<number_array_type> sample;
+	boost::scoped_ptr<color_array_type> image;
+	boost::scoped_ptr<color_array_type> image_pool;
+	boost::scoped_ptr<number_array_type> sample;
 	mutable boost::mutex mutex_read;
 	mutable boost::mutex mutex_write;
 	boost::gil::rgb8_image_t img;
 	boost::gil::rgb8_view_t v;
+	std::string current_file;
+	std::string current_d;
 
 };
 

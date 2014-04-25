@@ -22,18 +22,20 @@ class Scene:
 {
 public:
 	Scene(int w = 640, int h = 480);
+	~Scene();
     void createTracer();
 	void buildScene(bool withBlender = false);
     void addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4);
 
     void renderScene();
-    void renderTile(int z_start, int x_start, int z_end, int x_end) const;
+    void renderTile(int z_start, int x_start, int z_end, int x_end, int sample_n) const;
 	bool hitBack(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitSphere(const Ray& ray, double& tmin, ShadePacket& sp) const;
 	bool hitFloor(const Ray& ray, double& tmin, ShadePacket& sp) const;
 
     void setCallback(boost::function<void ()> f);
     void setSendTile(boost::function<void (int, int, int, int)> f);
+    // void clearThread();
 	void waiting();
 	void stopAllThreads();
 
@@ -57,7 +59,7 @@ public:
 	double inv_w, inv_h;
 	double fov, aspectratio, angle;
 	Point3 origin;
-	boost::shared_ptr<Camera> camera;
+	boost::scoped_ptr<Camera> camera;
 
 	std::vector<boost::shared_ptr<BaseObject> > objects;
 	std::vector<boost::shared_ptr<Light> > lights;
@@ -65,8 +67,8 @@ public:
 	boost::scoped_ptr<Output> output;
 	boost::scoped_ptr<Tracer> tracer_ptr;
 	// boost::threadpool::pool pool;
-    boost::shared_ptr<ThreadPool> pool;
-	boost::thread waitingThread;
+    boost::scoped_ptr<ThreadPool> pool;
+	// boost::thread waitingThread;
 	boost::function<void()> callback;
 	mutable boost::mutex mutex_update;
 	bool running;

@@ -15,9 +15,12 @@
 
 using namespace boost;
 
+boost::thread waitingThread;
+
 int count = 0;
 
-Scene::Scene(int w, int h):
+Scene::Scene(int w, int h)
+    :
     width(w),
     height(h),
     sample(1),
@@ -42,6 +45,17 @@ Scene::Scene(int w, int h):
 	new_object = boost::shared_ptr<TriangleMesh>();
 }
 
+Scene::~Scene()
+{
+	std::cout<<"in destructor"<<std::endl;
+	for (int i = 0; i < objects.size(); ++i)
+		objects[i].reset();
+	objects.clear();
+	for (int i = 0; i < lights.size(); ++i)
+		lights[i].reset();
+	lights.clear();
+}
+
 inline float rand_float()
 {
 	return ((float)rand()/ (float)RAND_MAX);
@@ -49,6 +63,7 @@ inline float rand_float()
 
 void Scene::buildScene(bool withBlender)
 {
+	/*
 	shared_ptr<Material> m_sphere1(
 	            new Material(
 	                Color(255.0/255, 226.0/255, 190.0/255),
@@ -138,28 +153,26 @@ void Scene::buildScene(bool withBlender)
 	objects.push_back(shared_ptr<BaseObject>(s));
 	}
 
-	/*
-	shared_ptr<TriangleMesh> tt = shared_ptr<TriangleMesh>(new TriangleMesh(m_mesh, false));
-	tt->addVertice(Point3( 0,  0, 0), Vector3( 0,  0, -1));
-	tt->addVertice(Point3( 0,  0, 4), Vector3( 0,  0,  1));
-	tt->addVertice(Point3( 2,  0, 2), Vector3( 1,  0,  0));
-	tt->addVertice(Point3(-2,  0, 2), Vector3(-1,  0,  0));
-	tt->addVertice(Point3( 0,  2, 2), Vector3( 0,  1,  0));
-	tt->addVertice(Point3( 0, -2, 2), Vector3( 0, -1,  0));
-	tt->addFace(0, 2, 4);
-	tt->addFace(0, 4, 3);
-	tt->addFace(0, 3, 5);
-	tt->addFace(0, 5, 2);
-	tt->addFace(1, 4, 2);
-	tt->addFace(1, 2, 5);
-	tt->addFace(1, 5, 3);
-	tt->addFace(1, 3, 4);
-	tt->finishObject();
+	// shared_ptr<TriangleMesh> tt = shared_ptr<TriangleMesh>(new TriangleMesh(m_mesh, false));
+	// tt->addVertice(Point3( 0,  0, 0), Vector3( 0,  0, -1));
+	// tt->addVertice(Point3( 0,  0, 4), Vector3( 0,  0,  1));
+	// tt->addVertice(Point3( 2,  0, 2), Vector3( 1,  0,  0));
+	// tt->addVertice(Point3(-2,  0, 2), Vector3(-1,  0,  0));
+	// tt->addVertice(Point3( 0,  2, 2), Vector3( 0,  1,  0));
+	// tt->addVertice(Point3( 0, -2, 2), Vector3( 0, -1,  0));
+	// tt->addFace(0, 2, 4);
+	// tt->addFace(0, 4, 3);
+	// tt->addFace(0, 3, 5);
+	// tt->addFace(0, 5, 2);
+	// tt->addFace(1, 4, 2);
+	// tt->addFace(1, 2, 5);
+	// tt->addFace(1, 5, 3);
+	// tt->addFace(1, 3, 4);
+	// tt->finishObject();
 	// std::cout<<tt->toString()<<std::endl;
 
 	// tt->shift(Vector3(1, -4, 1));
-	objects.push_back(shared_ptr<BaseObject>(tt));
-	*/
+	// objects.push_back(shared_ptr<BaseObject>(tt));
 
 	if (!withBlender){
 	shared_ptr<Plane> p;
@@ -198,18 +211,19 @@ void Scene::buildScene(bool withBlender)
 
 	l = shared_ptr<Light>(new RectLight(rr, 160, Color(1.0)));
 	// lights.push_back(l);
+	*/
 }
 
 void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
 {
-    camera = boost::shared_ptr<Camera>(new Camera(location, width, height));
+    camera.reset(new Camera(location, width, height));
     camera->setVectors(v1, v2, v3, v4);
 }
 
 void Scene::renderScene()
 {
 	if (!camera){
-	    camera = boost::shared_ptr<Camera>(new Camera(Point3(0, -12, 1), width, height));
+	    camera.reset(new Camera(Point3(0, -12, 1), width, height));
 	    camera->generateVectors(Vector3(0, 6, 0));
 	}
 	tracer_ptr->setScene(shared_from_this());
@@ -240,7 +254,7 @@ void Scene::renderScene()
 							   */
 			pool->enqueue(boost::bind(&Scene::renderTile, this, i, j,
 			                   i + tile_height < height ? i + tile_height : height,
-		                       j + tile_width  < width  ? j + tile_width  : width));
+		                       j + tile_width  < width  ? j + tile_width  : width, sample_i));
     }
 	// only for debug!!
 	/*
@@ -250,8 +264,8 @@ void Scene::renderScene()
 	                   false));
    */
 	// only for try!
-	if (!sendTile)
-	    waitingThread = boost::thread(&Scene::waiting, this);
+	// if (!sendTile)
+	waitingThread = boost::thread(&Scene::waiting, this);
     //threads.join_all();
 }
 
@@ -260,6 +274,11 @@ void Scene::setCallback(boost::function<void()> f)
 	callback = f;
 }
 
+void clearThread()
+{
+	std::cout<<"in at_thread_exit"<<std::endl;
+	waitingThread.join();
+}
 
 void Scene::stopAllThreads()
 {
@@ -274,6 +293,7 @@ void Scene::stopAllThreads()
 
 void Scene::waiting()
 {
+    // boost::this_thread::at_thread_exit(boost::bind(clearThread));
 	pool->wait(0);
 	callback();
 }
@@ -302,7 +322,7 @@ double difference(const Color& c1, const Color& c2)
 	        + fabs(c1.b - c2.b);
 }
 
-void Scene::renderTile(int z_start, int x_start, int z_end, int x_end) const
+void Scene::renderTile(int z_start, int x_start, int z_end, int x_end, int sample_n) const
 {
 	Color color;
 	Ray ray;
@@ -322,7 +342,7 @@ void Scene::renderTile(int z_start, int x_start, int z_end, int x_end) const
 				ray = camera->getRay(x, z);
 				ray.normalize();
 
-			    color += tracer_ptr->trace_ray(ray, 1);
+			    color += tracer_ptr->trace_ray(ray, 1, sample_n);
 				output->addColor(color, x, z);
 			}
 	    }
@@ -398,8 +418,7 @@ void Scene::finishObject()
 	new_object->finishObject();
 	std::cout<<"in finishObject"<<std::endl;
 	objects.push_back(new_object);
-	// like new_object = NULL;
-	new_object = boost::shared_ptr<TriangleMesh>();
+	new_object.reset();
 }
 
 

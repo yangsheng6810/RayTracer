@@ -2,20 +2,22 @@
 #define BOOST_SYSTEM_NO_LIB
 #define BOOST_FILESYSTEM_NO_LIB
 #include "output.h"
+#include <sstream>
+#include <iomanip>
 #include <boost/filesystem.hpp>
 #include <boost/gil/extension/io/png_dynamic_io.hpp>
 using namespace boost::gil;
 
 Output::Output(int ww, int hh):
-    width(ww), height(hh)
+    width(ww), height(hh),
+	image(new color_array_type(boost::extents[height][width])),
+	image_pool(new color_array_type(boost::extents[height][width])),
+    sample(new number_array_type(boost::extents[height][width]))
 {
     // img = rgb8_image_t(ww, hh);
     // v = view(img);
 	// rgb8_pixel_t black(0, 0, 0);
     // fill_pixels(view(img), black);
-	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
-	image_pool = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
-    sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
 	img = rgb8_image_t(width, height);
 	v = boost::gil::view(img);
 	Color c("black");
@@ -32,6 +34,23 @@ Output::Output(int ww, int hh):
 		remove_all(temp_d);
 	}
 	boost::filesystem::create_directory(temp_d);
+
+    current_d = "/home/yangsheng/Blender/ppm_output";
+	boost::filesystem::path animate_d = current_d;
+	if (!boost::filesystem::exists(animate_d))
+		boost::filesystem::create_directory(animate_d);
+	bool finished = false;
+	int i = 1;
+	while(!finished){
+		std::ostringstream strs;
+		strs<<current_d<<"/"<<std::setw(4)<<std::setfill('0')<<i<<".ppm";
+		animate_d = strs.str();
+		if (!boost::filesystem::exists(animate_d)){
+			current_file = strs.str();
+			finished = true;
+		}
+		i++;
+	}
 }
 
 Output::~Output()
@@ -42,9 +61,9 @@ void Output::setResolution(int width_, int height_)
 {
 	width = width_;
 	height = height_;
-	image = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
-	image_pool = boost::shared_ptr<color_array_type>(new color_array_type(boost::extents[height][width]));
-    sample = boost::shared_ptr<number_array_type>(new number_array_type(boost::extents[height][width]));
+	image.reset(new color_array_type(boost::extents[height][width]));
+	image_pool.reset(new color_array_type(boost::extents[height][width]));
+    sample.reset(new number_array_type(boost::extents[height][width]));
 	img = rgb8_image_t(width, height);
 	v = boost::gil::view(img);
 }
@@ -52,7 +71,8 @@ void Output::setResolution(int width_, int height_)
 void Output::writePic() const
 {
     boost::mutex::scoped_lock lock_m(mutex_read);
-	std::ofstream ofs("./untitled.ppm", std::ios::out | std::ios::binary);
+	// std::ofstream ofs("./untitled.ppm", std::ios::out | std::ios::binary);
+	std::ofstream ofs(current_file.c_str(), std::ios::out | std::ios::binary);
 	ofs << "P6\n" << width << " " << height << "\n255\n";
 	for (unsigned i = 0; i < height; ++i)
 		for(unsigned j = 0; j < width; ++j){

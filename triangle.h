@@ -16,7 +16,7 @@ public:
 	size_t material_index;
 	Vector3 normal;
 private:
-	boost::shared_ptr<TriangleMesh> object_ptr;
+	boost::weak_ptr<TriangleMesh> w_object_ptr;
 };
 
 #endif // TRIANGLE_H

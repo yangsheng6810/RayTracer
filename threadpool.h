@@ -32,7 +32,7 @@ private:
 
     // the io_service we are wrapping
     boost::asio::io_service service;
-    std::auto_ptr<boost::asio::io_service::work> work;
+    boost::shared_ptr<boost::asio::io_service::work> work;
     friend class Worker;
 };
 // all the workers do is execute the io_service
@@ -61,6 +61,8 @@ void ThreadPool::wait(int i)
 	work.reset();
 	for(size_t i = 0; i < workers.size(); ++i)
 		workers[i]->join();
+	service.stop();
+	workers.clear();
 }
 
 void ThreadPool::clear()
@@ -71,9 +73,14 @@ void ThreadPool::clear()
 // the destructor joins all threads
 ThreadPool::~ThreadPool()
 {
+	std::cout<<"in ThreadPool destructor"<<std::endl;
     service.stop();
-    for(size_t i = 0;i<workers.size();++i)
+	for(size_t i = 0;i<workers.size();++i){
         workers[i]->join();
+		workers[i].reset();
+	}
+	workers.clear();
+	std::cout<<"exit from ThreadPool destructor"<<std::endl;
 }
 
 #endif // THREADPOOL_H

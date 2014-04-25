@@ -24,9 +24,10 @@ class TriangleMesh : public BaseObject,
 public:
 	// TriangleMesh(boost::shared_ptr<Material> m_ = boost::shared_ptr<Material>(), bool smooth_ = false);
 	TriangleMesh(bool smooth_ = false);
+	~TriangleMesh();
 	void addVertice(const Point3& p, const Vector3& v);
 	void addFace(size_t v0, size_t v1, size_t v2, size_t material_index);
-	void addMaterial(boost::shared_ptr<Material> m_);
+	void addMaterial(const boost::shared_ptr<Material> &m_);
 	void finishObject();
 	bool hit(const Ray &ray, double &tmin, ShadePacket &sp) const;
 	bool shadow_hit(const Ray &ray, double &tmin) const;
@@ -47,7 +48,7 @@ private:
 	float x_min, x_max, y_min, y_max, z_min, z_max;
 	// boost::shared_ptr<Material> m_ptr;
 	std::vector<boost::shared_ptr<Material> > materials;
-	boost::shared_ptr<SAHKDTree> tree_ptr;
+	boost::scoped_ptr<SAHKDTree> tree_ptr;
 	double kEpsilon;
 	bool smooth;
 

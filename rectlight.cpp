@@ -15,7 +15,7 @@ inline float rand_float()
 	return ((float)rand()/ (float)RAND_MAX);
 }
 
-Vector3 RectLight::get_direction(const ShadePacket &sp) const
+Vector3 RectLight::get_direction(const ShadePacket &sp, int sample_n)
 {
 	Point3 p = rect_ptr->p0;
 #ifdef WITH_SAMPLE_NUMBER

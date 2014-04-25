@@ -10,7 +10,7 @@ Parallel::Parallel(Vector3 dir_, float ls_, Color color_):
 {
 }
 
-Vector3 Parallel::get_direction(const ShadePacket &sp) const
+Vector3 Parallel::get_direction(const ShadePacket &sp, int sample_n)
 {
 	return direction;
 }
