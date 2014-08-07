@@ -20,7 +20,7 @@ SAHKDTree::~SAHKDTree()
 
 void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects)
 {
-	std::cout<<"in SAHKDTree::build"<<std::endl;
+	// std::cout<<"in SAHKDTree::build"<<std::endl;
 	std::vector<BBox> objectBBoxes(objects.size());
 	BuildState curState;
 	curState.objects.reset(new std::vector<size_t>);

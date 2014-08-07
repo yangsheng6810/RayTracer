@@ -7,6 +7,7 @@
 #include "output.h"
 #include "light.h"
 #include "camera.h"
+#include "constants.h"
 #include <vector>
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
@@ -27,6 +28,8 @@ public:
 	void buildScene(bool withBlender = false);
     void addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4);
 
+	void buildTree();
+	void buildTreeForObj(int i);
     void renderScene();
     void renderTile(int z_start, int x_start, int z_end, int x_end, int sample_n) const;
 	bool hitBack(const Ray& ray, double& tmin, ShadePacket& sp) const;
@@ -35,7 +38,7 @@ public:
 
     void setCallback(boost::function<void ()> f);
     void setSendTile(boost::function<void (int, int, int, int)> f);
-    // void clearThread();
+    void clearThread();
 	void waiting();
 	void stopAllThreads();
 
@@ -49,7 +52,7 @@ public:
 	void addVertice(const Point3& point, const Vector3& normal);
 	void addFace(int v1, int v2, int v3, size_t material_index);
 	void finishObject();
-	void addLamp(Point3 location, Vector3 direction, Color color, double energy, double spot_size);
+	void addLamp(Point3 location, Vector3 direction, double distance, Color color, double energy, double spot_size);
 	boost::shared_ptr<TriangleMesh> new_object;
 
 	boost::function<void (int, int, int, int)> sendTile;
@@ -68,6 +71,7 @@ public:
 	boost::scoped_ptr<Tracer> tracer_ptr;
 	// boost::threadpool::pool pool;
     boost::scoped_ptr<ThreadPool> pool;
+    boost::scoped_ptr<ThreadPool> pool_for_tree;
 	// boost::thread waitingThread;
 	boost::function<void()> callback;
 	mutable boost::mutex mutex_update;

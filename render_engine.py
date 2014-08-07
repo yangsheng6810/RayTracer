@@ -42,7 +42,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
             print("render")
         #    self.render_scene(scene)
 
-        self.render_engine.render(self, bpy.context, bpy.data, 100)
+        self.render_engine.render(self, bpy.context, bpy.data, 1)
         print("before sleep")
         while True:
             if self.test_break():

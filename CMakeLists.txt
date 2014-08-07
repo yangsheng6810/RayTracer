@@ -9,6 +9,7 @@ set(MY_SOURCES
 		color.cpp
         bbox.cpp
         threadpool.h
+        constants.h
         sahkdtree.cpp
         triangle.cpp
         light.cpp
@@ -48,7 +49,7 @@ IF(Boost_FOUND)
 
     #find_package(Boost REQUIRED thread system)
 
-    #add_definitions(-DWITH_SAMPLE_NUMBER=20)
+    add_definitions(-DWITH_SAMPLE)
 	add_library(my-library SHARED ${MY_SOURCES})
 	target_link_libraries(my-library
             ${CMAKE_THREAD_LIBS_INIT}
@@ -66,7 +67,7 @@ IF(Boost_FOUND)
             #${Boost_LIBRARIES}
     )
 
-    include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python3.3m")
+    include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python3.4m")
     #include_directories("${Boost_INCLUDE_DIRS}" "/usr/include/python2.7")
     FIND_PACKAGE(Boost 1.54.0 COMPONENTS python3 REQUIRED)
     #FIND_PACKAGE(Boost 1.54.0 COMPONENTS python REQUIRED)

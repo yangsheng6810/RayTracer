@@ -16,7 +16,7 @@ Tracer::Tracer()
 
 Tracer::~Tracer()
 {
-	scene_weak_ptr = boost::weak_ptr<Scene>();
+	scene_weak_ptr.reset();
 }
 
 inline double rand_double()
@@ -77,14 +77,9 @@ Color Tracer::diffuse_limited(const Ray& ray,
 	for(int i = 0; i != scene_ptr->lights.size(); ++i){
 		l_ptr = scene_ptr->lights[i];
 		Color temp = Color(0);
-		int sample_number = 1;
 		// to speed up for debug
-#ifdef WITH_SAMPLE_NUMBER
-		if (l_ptr->need_sample)
-			sample_number = 20;
-#endif
-		for(int s = 0; s != sample_number; ++s){
-			light_vec = l_ptr->get_direction(sp_, sample_n);
+		for(int s = 0; s < LIGHT_SAMPLE_NUMBER; ++s){
+			light_vec = l_ptr->get_direction(sp_, sample_n + s);
 
 			bool in_shadow = false;
 			double t;
@@ -98,6 +93,7 @@ Color Tracer::diffuse_limited(const Ray& ray,
 			}
 
 			if (!in_shadow){
+				light_vec.normalize();
 				h_vec = (view_vec + (-light_vec)).normalize();
 				// h_vec.normalize();
 				intense = light_vec * sp_.normal;
@@ -105,17 +101,21 @@ Color Tracer::diffuse_limited(const Ray& ray,
 					intense = 0;
 				intense_p = l_ptr->L(sp_) * intense;
 				// may not produce a good effect
-				intense_p.divide(sqrt(light_vec.lenSquare()));
+				intense_p.divide(distance * distance);
+				// intense_p.divide(light_vec.lenSquare());
 				// intense_p.divide(10 * sqrt(light_vec.lenSquare()));
+				/*
+				*/
 				temp += intense_p * sp_.m.diffuse_color
 				        * sp_.m.diffuse_intensity * ((-view_vec * sp_.normal) > 0 ? -view_vec * sp_.normal : 0);// diffuse
 				temp += intense_p * sp_.m.specular_color
 				        * sp_.m.specular_intensity * pow((h_vec * sp_.normal) > 0 ? h_vec * sp_.normal : 0, sp_.m.hardness);// highlight
 			}
 		}
+	    scene_ptr.reset();
 		// if (sample_number > 1)
 		// 	temp.divide(2);
-		temp.divide(sample_number);
+		temp.divide(LIGHT_SAMPLE_NUMBER);
 		diffuse += temp;
 	}
 	return diffuse;
@@ -142,7 +142,6 @@ Color Tracer::diffuse_direct(const Ray& ray,
 		Color temp = Color(0);
 		light_vec = l_ptr->get_direction(sp_, 0); // added to emulate?
 		h_vec = (view_vec + (-light_vec)).normalize();
-		// h_vec.normalize();
 		intense = light_vec * sp_.normal;
 		if (intense < 0) // don't know why
 			intense = 0;
@@ -150,12 +149,13 @@ Color Tracer::diffuse_direct(const Ray& ray,
 		// may not produce a good effect
 		// intense_p.divide(light_vec.lenSquare());
 		// intense_p.divide(10 * sqrt(light_vec.lenSquare()));
-		temp += intense_p * sp_.m.diffuse_color
+		temp = intense_p * sp_.m.diffuse_color
 		        * sp_.m.diffuse_intensity * (-view_vec * sp_.normal);// diffuse
-		temp += intense_p * sp_.m.specular_color
-		        * sp_.m.specular_intensity * pow(h_vec * sp_.normal, sp_.m.hardness);// highlight
+		temp = blend(temp, intense_p * sp_.m.specular_color
+		        * sp_.m.specular_intensity * pow(h_vec * sp_.normal, sp_.m.hardness));// highlight
 		diffuse += temp;
 	}
+	scene_ptr.reset();
 	return diffuse;
 }
 
@@ -166,7 +166,7 @@ Color Tracer::trace_ray(const Ray& ray, float weight, int sample_n) const
     ShadePacket sp, sp_;
 	double t, t_ = INFINITY;
 	boost::shared_ptr<Scene> scene_ptr = scene_weak_ptr.lock();
-	int this_index = 1000;
+	int object_index;
 
 
 	for (int i = 0; i != scene_ptr->objects.size(); i++){
@@ -175,7 +175,7 @@ Color Tracer::trace_ray(const Ray& ray, float weight, int sample_n) const
 			if (t < t_){
 				t_ = t;
 				sp_ = sp;
-				this_index = i;
+				object_index = i;
 			}
 		}
 	}
@@ -211,25 +211,22 @@ Color Tracer::trace_ray(const Ray& ray, float weight, int sample_n) const
 		}
 		// ret += diffuse;
 
-		// std::cout<<"ray.d length square = "<<ray.d.lenSquare()<<std::endl;
-		// std::cout<<"sp_.normal length square = "<<sp_.normal.lenSquare()<<std::endl;
-		double ratio = fabs(ray.d * sp_.normal);
-		// std::cout<<"ratio = "<<ratio<<std::endl;
-		if (ratio > 1)
-			ratio = 1;
-		double power0 = pow(1 - ratio, 3);
-		double fresneleffect = 0.9 * power0 + 0.1;
 
 		Color reflect_c = Color(0);
 		// start for reflect light
 		if (sp_.m.reflect){
 		    Ray reflect(sp_.hitPoint, 2 * (sp_.normal * (- ray.d)) * sp_.normal + ray.d);
 		    // reflect.d.addNoise();
-		    reflect_c = fresneleffect * trace_ray(reflect, weight * RATE, sample_n);// reflection
+		    reflect_c = trace_ray(reflect, weight * RATE, sample_n);// reflection
+			// test effect
+			diffuse = 2* diffuse;
 		}
 
 		Color refract_c = Color(0);
 		bool inside = false;
+		Color environment(ENVIRONMENT_LIGHT);
+
+		double fresneleffect = 0.8;
 
 		// start for refract light
 		if (sp_.m.transparent){
@@ -253,19 +250,32 @@ Color Tracer::trace_ray(const Ray& ray, float weight, int sample_n) const
 			Ray refraction(sp_.hitPoint, refrdir);
 			// not implemented, and may not need
 			// refraction.d.addNoise();
-		    refract_c = (1 - fresneleffect) * trace_ray(refraction, weight * RATE, sample_n);
+		    double ratio = fabs(ray.d * sp_.normal);
+		    // std::cout<<"ratio = "<<ratio<<std::endl;
+		    if (ratio > 1)
+			    ratio = 1;
+		    double power0 = pow(1 - ratio, 3);
+		    fresneleffect = 0.9 * power0 + 0.1;
+		    refract_c = trace_ray(refraction, weight * RATE, sample_n);
 		}
-		if (inside && sp_.m.transparent)
+
+		if (inside && sp_.m.transparent){
 		    // ret = sp_.m.emission + reflect_c * sp_.m.r_reflect
 			//       + refract_c * (1 - sp_.m.r_diffuse - sp_.m.r_reflect);
-		    ret = 0.5 * sp_.m.emission + (reflect_c + refract_c) * sp_.m.r_reflect;
-        else {
-			// ret = sp_.m.emission + environment + diffuse * sp_.m.r_diffuse
+
+		    // ret = blend(sp_.m.emission, (reflect_c + refract_c) * sp_.m.r_reflect);
+			ret = blend(diffuse, sp_.m.emission);
+			ret = ret * sp_.m.diffuse_color;
+        } else {
+			// ret = sp_.m.emission + sp_.m.diffuse_color *
+			//       (environment + diffuse//  * sp_.m.r_diffuse
 			//       + reflect_c * sp_.m.r_reflect
-			//       + refract_c * (1 - sp_.m.r_diffuse - sp_.m.r_reflect);
-		    ret = 0.5 * sp_.m.emission + (reflect_c + refract_c);//  * sp_.m.r_reflect;
-		    ret = ret * sp_.m.diffuse_color;
-			ret += diffuse;// * sp_.m.r_diffuse;
+			//       + refract_c * (1 - sp_.m.r_diffuse - sp_.m.r_reflect));
+
+		    ret = blend(sp_.m.diffuse_color * sp_.m.emission,
+			            (fresneleffect * reflect_c + (1 - fresneleffect) * refract_c) * sp_.m.diffuse_color);//  * sp_.m.r_reflect;
+			ret = blend(ret, diffuse);
+			ret = blend(ret, environment * sp_.m.diffuse_color);
         }
 		return ret;
 	}

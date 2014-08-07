@@ -4,6 +4,7 @@
 #include "vector3.h"
 #include "ray.h"
 #include "shadepacket.h"
+#include "constants.h"
 #include <boost/smart_ptr.hpp>
 
 class Scene;

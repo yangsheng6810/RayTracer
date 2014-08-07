@@ -9,8 +9,8 @@ class RectLight : public Light
 public:
 	RectLight(boost::shared_ptr<Rectangle> rect_ptr_,
 			float ls_, Color color_);
-	Vector3 get_direction(const ShadePacket &sp, int sample_n);
-	Color L(const ShadePacket &sp);
+	Vector3 get_direction(const ShadePacket &sp, int sample_n) const;
+	Color L(const ShadePacket &sp) const;
 
 private:
 	float ls;

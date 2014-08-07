@@ -52,12 +52,13 @@ class MyRender():
     def addLamp(self, scene, lamp):
         location = lamp.location
         data = lamp.data
-        matrix = lamp.matrix_world
+        matrix = lamp.matrix_world.to_quaternion()
         v = Vector()
-        v.z = 1.0
-        direction = -(matrix * v)
+        v.z = -1.0
+        # print(location)
+        direction = matrix * v
         if data.type == 'SPOT':
-            self.L.add_lamp(location, direction, data.color, data.energy, data.spot_size)
+            self.L.add_lamp(location, direction, data.distance / 10, data.color, data.energy, data.spot_size)
 
     def setParameters(self, addon):
         pass

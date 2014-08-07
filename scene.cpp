@@ -27,7 +27,8 @@ Scene::Scene(int w, int h)
     sendTile(NULL),
 	output(new Output(w, h)),
 	tracer_ptr(new Tracer()),
-	pool(new ThreadPool(4))
+	pool(new ThreadPool(4)),
+	pool_for_tree(new ThreadPool(4))
 {
 	// temporarily!
 	// sample = 100;
@@ -54,6 +55,7 @@ Scene::~Scene()
 	for (int i = 0; i < lights.size(); ++i)
 		lights[i].reset();
 	lights.clear();
+	clearThread();
 }
 
 inline float rand_float()
@@ -220,8 +222,26 @@ void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vecto
     camera->setVectors(v1, v2, v3, v4);
 }
 
+void Scene::buildTree() {
+	for(int i = 0; i < objects.size(); i++){
+        pool_for_tree->enqueue(boost::bind(&Scene::buildTreeForObj,
+		                          this,
+		                          i));
+	}
+	pool_for_tree->wait(0);
+}
+
+void Scene::buildTreeForObj(int i){
+	boost::shared_ptr<TriangleMesh> obj =
+	        boost::dynamic_pointer_cast<TriangleMesh>(objects[i]);
+	if(obj)
+		obj->finishObject();
+}
+
 void Scene::renderScene()
 {
+	buildTree();
+	std::cout<<"after building tree"<<std::endl;
 	if (!camera){
 	    camera.reset(new Camera(Point3(0, -12, 1), width, height));
 	    camera->generateVectors(Vector3(0, 6, 0));
@@ -232,7 +252,9 @@ void Scene::renderScene()
 
 	running = true;
 	count = 0;
+	/*
 	int ccount = 0;
+	*/
 
 	/*
 	if (!sendTile)
@@ -240,7 +262,7 @@ void Scene::renderScene()
 		*/
 
 	// sample
-	for(int sample_i = 0; sample_i != sample; sample_i++)
+	for(int sample_i = 0; sample_i < sample; sample_i += LIGHT_SAMPLE_NUMBER)
 	for (int i=0; i < height; i += tile_height)
 		for (int j = 0; j < width; j += tile_width){
 			/*
@@ -274,9 +296,9 @@ void Scene::setCallback(boost::function<void()> f)
 	callback = f;
 }
 
-void clearThread()
+void Scene::clearThread()
 {
-	std::cout<<"in at_thread_exit"<<std::endl;
+	std::cout<<"clearing threads"<<std::endl;
 	waitingThread.join();
 }
 
@@ -288,6 +310,7 @@ void Scene::stopAllThreads()
 	    running = false;
 	}
 	pool->wait(0);
+	pool->clear();
 	std::cout<<"All threads stopped"<<std::endl;
 }
 
@@ -295,6 +318,7 @@ void Scene::waiting()
 {
     // boost::this_thread::at_thread_exit(boost::bind(clearThread));
 	pool->wait(0);
+	pool->clear();
 	callback();
 }
 
@@ -339,10 +363,13 @@ void Scene::renderTile(int z_start, int x_start, int z_end, int x_end, int sampl
 			for(int x = x_start; x < x_end; x++){
 				// color = Color(0.5);
 				color = Color(0, 0, 0);
-				ray = camera->getRay(x, z);
-				ray.normalize();
+				for(int cc = 0; cc < SAMPLE_PER_PIXEL; cc++){
+				    ray = camera->getRay(x, z);
+				    ray.normalize();
 
-			    color += tracer_ptr->trace_ray(ray, 1, sample_n);
+			        color += tracer_ptr->trace_ray(ray, 1, sample_n);
+                }
+                color.divide(SAMPLE_PER_PIXEL);
 				output->addColor(color, x, z);
 			}
 	    }
@@ -415,16 +442,18 @@ void Scene::addFace(int v1, int v2, int v3, size_t material_index)
 
 void Scene::finishObject()
 {
-	new_object->finishObject();
-	std::cout<<"in finishObject"<<std::endl;
+	// new_object->finishObject();
+	// std::cout<<"in finishObject"<<std::endl;
 	objects.push_back(new_object);
 	new_object.reset();
 }
 
 
-void Scene::addLamp(Point3 location, Vector3 direction, Color color, double energy, double spot_size)
+void Scene::addLamp(Point3 location, Vector3 direction, double distance,
+                    Color color, double energy, double spot_size)
 {
-	std::cout<<"come to scene::addLamp"<<std::endl;
+	// std::cout<<"come to scene::addLamp"<<std::endl;
     lights.push_back(shared_ptr<Light>(
-	                     new SpotLight(location, direction, color, energy, spot_size)));
+	                     new SpotLight(location, direction, distance,
+	                                   color, energy, spot_size)));
 }

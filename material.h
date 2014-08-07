@@ -23,7 +23,6 @@ public:
 
 	Color diffuse_color, specular_color;
 	double diffuse_intensity, specular_intensity, hardness;
-	double r_diffuse, r_reflect;
 	bool transparent;
 	bool reflect;
 	bool isLight;

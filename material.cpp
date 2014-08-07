@@ -20,7 +20,6 @@ Material::Material(Color diffuse_color_,
 
 Material::Material(const Material &m):
     isLight(m.isLight),
-    r_reflect(m.r_reflect), r_diffuse(m.r_diffuse),
     emission(m.emission),
 
     diffuse_color(m.diffuse_color),
@@ -35,8 +34,6 @@ Material::Material(const Material &m):
 
 Material& Material::operator =(const Material& m)
 {
-    r_diffuse = m.r_diffuse;
-	r_reflect = m.r_reflect;
 	isLight = m.isLight;
 	emission = m.emission;
 	diffuse_color = m.diffuse_color;

@@ -18,11 +18,6 @@ PyObject *pythonAddTile;
 boost::thread waitingThread;
 int total_sample = 0;
 
-char const* yay()
-{
-  return "Yay!";
-}
-
 char const* add_objects(object s)
 {
     //first we need to get the this attribute from the Python Object
@@ -69,7 +64,6 @@ void add_material(object material)
 	                ));
 	}
 	scene->addMaterial(m);
-	m.reset();
 }
 
 void add_vertice(object point, object normal)
@@ -165,22 +159,22 @@ void send_success()
     PyGILState_Release(state);
 }
 
-char const* new_scene(PyObject *engine)
+void new_scene(PyObject *engine)
 {
-	// scene = boost::shared_ptr<Scene>(new Scene(1366, 678));
 	scene.reset(new Scene(1366, 678));
 	renderEngine = engine;
-	Py_INCREF(renderEngine);
+	// need not increase ref
+	// Py_INCREF(renderEngine);
 
 	scene->setSendTile(addTile);
-	return "Success!";
 }
 
 void callback()
 {
 	// scene = boost::shared_ptr<Scene>();
 	std::cout<<"count of scene is "<<scene.use_count()<<std::endl;
-	Py_DECREF(renderEngine);
+	// need not increase ref
+	// Py_DECREF(renderEngine);
 	std::cout<<"clear scene in callback!"<<std::endl;
 	std::cout<<"Success!"<<std::endl;
 	send_success();
@@ -220,10 +214,11 @@ void add_camera(object location, object p1, object p2, object p3, object p4)
 	                 Vector3(loc, point4));
 }
 
-void add_lamp(object location, object direction, object color, object energy, object spot_size)
+void add_lamp(object location, object direction, object distance, object color, object energy, object spot_size)
 {
 	scene->addLamp(get_point(location),
 	               get_vect(direction),
+	               extract<double>(distance),
 	               get_color(color),
 	               extract<double>(energy),
 	               extract<double>(spot_size));
@@ -272,7 +267,6 @@ void clear_scene()
 
 BOOST_PYTHON_MODULE(librender)
 {
-  def("yay", yay);
   def("add_object", add_object);
   def("add_material", add_material, args("material"));
   def("add_vertice", add_vertice, args("point", "normal"));
