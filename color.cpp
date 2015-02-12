@@ -1,5 +1,7 @@
 #include <sstream>
+#include <cstdio>
 #include "color.h"
+#include "get_object.h"
 
 Color::Color()
 {
@@ -61,6 +63,7 @@ Color& Color::operator +=(const Color& c)
 	r += c.r;
 	g += c.g;
 	b += c.b;
+	return *this;
 }
 
 std::string Color::toString() const
@@ -111,4 +114,28 @@ Color blend(const Color& c1, const Color& c2)
 	return Color(c1.r + c2.r - c1.r * c2.r,
 				 c1.g + c2.g - c1.g * c2.g,
 				 c1.b + c2.b - c1.b * c2.b);
+}
+
+extern "C"{
+    void* color_new(){
+		Color* c = new Color();
+		return ((void *) c);
+	}
+	void* color_new_pointer(void *c__){
+		Color* c = new Color(GET_COLOR(c__));
+		return ((void *)c);
+	}
+	void* color_new_double(double shade){
+		Color* c = new Color(shade);
+		return ((void *)c);
+	}
+	void* color_new_rgb(double r, double g, double b){
+		Color* c = new Color(r,g,b);
+		return ((void *)c);
+	}
+	void color_print(void *c__){
+		printf("here!!\n");
+		printf(GET_COLOR(c__).toString().c_str());
+		printf("\n");
+	}
 }

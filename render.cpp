@@ -200,20 +200,6 @@ Point3 get_point(object p)
 	              extract<double>(p.attr("z")));
 }
 
-void add_camera(object location, object p1, object p2, object p3, object p4)
-{
-	Point3 loc = get_point(location),
-	        point1 = get_point(p1),
-	        point2 = get_point(p2),
-	        point3 = get_point(p3),
-	        point4 = get_point(p4);
-	scene->addCamera(loc,
-	                 Vector3(loc, point1),
-	                 Vector3(loc, point2),
-	                 Vector3(loc, point3),
-	                 Vector3(loc, point4));
-}
-
 void add_lamp(object location, object direction, object distance, object color, object energy, object spot_size)
 {
 	scene->addLamp(get_point(location),

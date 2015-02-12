@@ -1,6 +1,7 @@
 #include <sstream>
 #include <cassert>
 #include "point3.h"
+#include "get_object.h"
 
 Point3::Point3()
 {
@@ -44,6 +45,7 @@ float& Point3::operator[] (const int& index)
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }
@@ -63,6 +65,7 @@ float Point3::get(const int& index) const
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }
@@ -73,4 +76,19 @@ std::string Point3::toString() const
 	strs<<"("<<x<<", "<<y<<", "<<z<<")";
 	std::string str = strs.str();
 	return str;
+}
+
+extern "C" {
+    void* point3_new(){
+		Point3* p = new Point3();
+		return ((void *) p);
+	}
+	void* point3_new_pointer(void *pp){
+		Point3* p = new Point3(GET_POINT3(pp));
+		return ((void *)p);
+	}
+	void* point3_new_xyz(double xx, double yy, double zz){
+		Point3* p = new Point3(xx, yy, zz);
+		return ((void *)p);
+	}
 }

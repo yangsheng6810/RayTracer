@@ -74,8 +74,8 @@ void Output::writePic() const
 	// std::ofstream ofs("./untitled.ppm", std::ios::out | std::ios::binary);
 	std::ofstream ofs(current_file.c_str(), std::ios::out | std::ios::binary);
 	ofs << "P6\n" << width << " " << height << "\n255\n";
-	for (unsigned i = 0; i < height; ++i)
-		for(unsigned j = 0; j < width; ++j){
+	for (int i = 0; i < height; ++i)
+		for(int j = 0; j < width; ++j){
 			/*
     		ofs << (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255) <<
 	    	(unsigned char)((*image)[i][j].g / (*sample)[i][j] * 255) <<
@@ -103,8 +103,8 @@ std::vector<Color> Output::getTile(int x_start, int y_start, int width, int heig
 	std::vector<Color> ret;
 	int x_end = x_start + width;
 	int y_end = y_start + height;
-	for (unsigned i = y_start; i < y_end; ++i )
-		for(unsigned j = x_start; j < x_end; ++j )
+	for (int i = y_start; i < y_end; ++i )
+		for(int j = x_start; j < x_end; ++j )
 			ret.push_back((*image)[i][j]);
 	// std::cout<<"in Output::getTile, before return"<<std::endl;
 	return ret;
@@ -117,8 +117,8 @@ void Output::outputTile(int x_start, int y_start, int width, int height) const
 	rgb8_view_t my_view = view(tile);
 	int x_end = x_start + width;
 	int y_end = y_start + height;
-	for (unsigned i = y_start; i < y_end; ++i )
-		for(unsigned j = x_start; j < x_end; ++j ){
+	for (int i = y_start; i < y_end; ++i )
+		for(int j = x_start; j < x_end; ++j ){
 			/*
 			my_view(j - x_start,i - y_start) = rgb8_pixel_t(
 			             (unsigned char)((*image)[i][j].r / (*sample)[i][j] * 255),

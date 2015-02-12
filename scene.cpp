@@ -7,11 +7,13 @@
 #include "pointlight.h"
 #include "spotlight.h"
 #include "rectlight.h"
+#include "get_object.h"
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include <cstdlib>
 #include <math.h>
 #include <time.h>
+
 
 using namespace boost;
 
@@ -21,10 +23,10 @@ int count = 0;
 
 Scene::Scene(int w, int h)
     :
+    sendTile(NULL),
     width(w),
     height(h),
     sample(1),
-    sendTile(NULL),
 	output(new Output(w, h)),
 	tracer_ptr(new Tracer()),
 	pool(new ThreadPool(4)),
@@ -49,10 +51,10 @@ Scene::Scene(int w, int h)
 Scene::~Scene()
 {
 	std::cout<<"in destructor"<<std::endl;
-	for (int i = 0; i < objects.size(); ++i)
+	for (size_t i = 0; i < objects.size(); ++i)
 		objects[i].reset();
 	objects.clear();
-	for (int i = 0; i < lights.size(); ++i)
+	for (size_t i = 0; i < lights.size(); ++i)
 		lights[i].reset();
 	lights.clear();
 	clearThread();
@@ -223,7 +225,7 @@ void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vecto
 }
 
 void Scene::buildTree() {
-	for(int i = 0; i < objects.size(); i++){
+	for(size_t i = 0; i < objects.size(); i++){
         pool_for_tree->enqueue(boost::bind(&Scene::buildTreeForObj,
 		                          this,
 		                          i));
@@ -350,7 +352,6 @@ void Scene::renderTile(int z_start, int x_start, int z_end, int x_end, int sampl
 {
 	Color color;
 	Ray ray;
-	int index = 0;
 	/*
 	std::vector<Color> tileColor = output->getTile(x_start,
 	                                               z_start,
@@ -457,3 +458,90 @@ void Scene::addLamp(Point3 location, Vector3 direction, double distance,
 	                     new SpotLight(location, direction, distance,
 	                                   color, energy, spot_size)));
 }
+
+void* new_scene(){
+	shared_ptr<Scene> *s = new shared_ptr<Scene>(new Scene());
+    return WRAP(s);
+}
+
+void scene_set_callback(void *object, void *callback){
+	GET_SCENE_PTR(object)->setCallback(
+	            *static_cast<boost::function<void()>* >(callback));
+}
+
+void scene_render_scene(void *object){
+	GET_SCENE_PTR(object)->renderScene();
+}
+
+void scene_set_send_tile(void *object, void *add_tile){
+	GET_SCENE_PTR(object)->setSendTile(
+	            *static_cast<boost::function<void (int, int, int, int)>*>(add_tile));
+}
+
+void scene_add_object(void *object, int bool_value){
+	GET_SCENE_PTR(object)->addObject(bool_value);
+}
+
+void scene_add_material(void *object, void *material){
+	GET_SCENE_PTR(object)->addMaterial(
+	            GET_MATERIAL_PTR(material));
+}
+
+void scene_add_vertice(void *object, void *point, void *normal){
+	GET_SCENE_PTR(object)->addVertice(
+	            GET_POINT3(point),
+	            GET_VECTOR3(normal));
+}
+
+void scene_add_face(void *object, size_t v1, size_t v2, size_t v3,
+                    size_t index){
+	GET_SCENE_PTR(object)->addFace(
+	            v1, v2, v3, index);
+}
+
+void scene_finish_object(void *object){
+	GET_SCENE_PTR(object)->finishObject();
+}
+
+void scene_add_camera(void *object, void *location,
+                      void *p1, void *p2, void *p3, void *p4){
+	GET_SCENE_PTR(object)->addCamera(
+	            GET_POINT3(location),
+	            GET_VECTOR3(p1), GET_VECTOR3(p2),
+	            GET_VECTOR3(p3), GET_VECTOR3(p4)
+	            );
+}
+
+void scene_add_lamp(void *object, void *location,
+                    void *direction, double distance,
+                    void *color, double energy,
+                    double spot_size){
+	GET_SCENE_PTR(object)->addLamp(
+	            GET_POINT3(location),
+	            GET_VECTOR3(direction),
+	            distance,
+	            GET_COLOR(color),
+	            energy, spot_size
+	            );
+}
+
+void scene_stop_all_threads(void *object){
+	GET_SCENE_PTR(object)->stopAllThreads();
+}
+
+void scene_set_resolution(void *object, size_t width, size_t height){
+	GET_SCENE_PTR(object)->setResolution(width, height);
+}
+
+void scene_set_sample(void *object, size_t total_sample){
+	GET_SCENE_PTR(object)->setSample(total_sample);
+}
+
+int scene_get_threads_num(void *object){
+	return GET_SCENE_PTR(object)->getThreadNum();
+}
+
+void scene_set_grid(void *object, int row_number, int col_number){
+	GET_SCENE_PTR(object)->setGrid(row_number, col_number);
+}
+

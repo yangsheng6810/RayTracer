@@ -11,9 +11,9 @@ public:
 	Color L(const ShadePacket &sp) const;
 
 private:
+	Point3 point;
 	float ls;
 	Color color;
-	Point3 point;
 };
 
 #endif // POINTLIGHT_H

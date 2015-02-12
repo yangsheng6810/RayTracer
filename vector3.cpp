@@ -1,5 +1,6 @@
 #include <sstream>
 #include "vector3.h"
+#include "get_object.h"
 #include <cstdlib>
 #include <math.h>
 #include <time.h>
@@ -128,6 +129,7 @@ float& Vector3::operator[] (const int& index)
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }
@@ -164,4 +166,19 @@ std::string Vector3::toString() const
 	strs<<"("<<x<<", "<<y<<", "<<z<<")";
 	std::string str = strs.str();
 	return str;
+}
+
+extern "C" {
+    void* vector3_new(){
+		Vector3* p = new Vector3();
+		return ((void *) p);
+	}
+	void* vector3_new_pointer(void *pp){
+		Vector3* p = new Vector3(GET_VECTOR3(pp));
+		return ((void *)p);
+	}
+	void* vector3_new_xyz(double xx, double yy, double zz){
+		Vector3* p = new Vector3(xx, yy, zz);
+		return ((void *)p);
+	}
 }

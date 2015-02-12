@@ -21,4 +21,5 @@ ShadePacket& ShadePacket::operator = (const ShadePacket& sp)
     normal = sp.normal;
 	inside = sp.inside;
 	m = sp.m;
+	return *this;
 }

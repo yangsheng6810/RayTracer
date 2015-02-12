@@ -10,4 +10,6 @@
 #define SAMPLE_PER_PIXEL 5
 #define ENVIRONMENT_LIGHT 0.3
 
+#define TRUE 1
+
 #endif // CONSTANTS_H

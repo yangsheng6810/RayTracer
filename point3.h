@@ -1,5 +1,7 @@
 #ifndef POINT3_H
 #define POINT3_H
+
+#ifdef __cplusplus
 #include <string>
 #include <iostream>
 
@@ -17,5 +19,16 @@ public:
 
 	float x, y, z;
 };
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void* point3_new();
+	void* point3_new_pointer(void *);
+	void* point3_new_xyz(double xx, double yy, double zz);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // POINT3_H

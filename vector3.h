@@ -1,8 +1,10 @@
 #ifndef VECTOR3_H
 #define VECTOR3_H
+
+#include "point3.h"
+#ifdef __cplusplus
 #include <string>
 #include <iostream>
-#include "point3.h"
 
 class Vector3
 {
@@ -36,5 +38,17 @@ Point3 operator +(const Vector3& v, const Point3& p);
 Point3 operator +(const Point3& p, const Vector3& v);
 Vector3 operator *(const Vector3& v, const float& f);
 Vector3 operator *(const float& f, const Vector3 &v);
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void* vector3_new();
+	void* vector3_new_pointer(void *);
+	void* vector3_new_xyz(double xx, double yy, double zz);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // VECTOR3_H

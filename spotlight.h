@@ -12,12 +12,12 @@ public:
 	Color L(const ShadePacket &sp) const;
 
 private:
-	Color color;
 	Point3 location;
 	Vector3 direction;
 	double distance;
-	Vector3 xx, yy;
+	Color color;
 	double energy, spot_size;
+	Vector3 xx, yy;
 	std::vector<Point3> sampleLights;
 };
 

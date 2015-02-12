@@ -10,7 +10,6 @@ import sys
 from imp import reload
 sys.path.append('/home/yangsheng/Documents/Homework/Graphics/3/Mine/RayTracer-try-build')
 from my_try import MyRender
-import librender
 
 class CustomRenderEngine(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
@@ -23,7 +22,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
         print("in init")
         self.thread_num = 0;
         self.thread_count = 0;
-        self.render_engine = MyRender(librender)
+        self.render_engine = MyRender()
         self.finished = False
 
     # This is the only method called by blender, in this example

@@ -1,6 +1,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 #include "color.h"
+
+#ifdef __cplusplus
 #include <string>
 #include <boost/smart_ptr.hpp>
 
@@ -23,10 +25,26 @@ public:
 
 	Color diffuse_color, specular_color;
 	double diffuse_intensity, specular_intensity, hardness;
-	bool transparent;
 	bool reflect;
-	bool isLight;
+	bool transparent;
 	Color emission;
+	bool isLight;
 };
+#endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void* material_new_parameters(
+	        void* diffuse_color,
+	        double diffuse_intensity,
+	        void* specular_color,
+	        double specular_intensity,
+	        double hardness,
+	        int reflect,
+	        int transparent,
+	        void* emission);
+#ifdef __cplusplus
+}
+#endif
 #endif // MATERIAL_H

@@ -1,5 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
+#ifdef __cplusplus
 #include "baseobject.h"
 #include "trianglemesh.h"
 #include "sphere.h"
@@ -79,5 +80,36 @@ public:
 	mutable boost::mutex mutex_running;
 	mutable boost::mutex mutex_count;
 };
+#else
+#include <stddef.h>
+#endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void* new_scene();
+    void scene_set_callback(void *object, void *callback);
+	void scene_render_scene(void *object);
+	void scene_set_send_tile(void *object, void *add_tile);
+	void scene_add_object(void *object, int bool_value);
+    void scene_add_material(void *object, void *material);
+    void scene_add_vertice(void *object, void *point, void *normal);
+	void scene_add_face(void *object,
+	                    size_t v1, size_t v2, size_t v3,
+	                    size_t index);
+	void scene_finish_object(void *object);
+	void scene_add_camera(void *object, void *location,
+	                      void *p1, void *p2, void *p3, void *p4);
+	void scene_add_lamp(void *object, void *location,
+	                    double distance, void *color,
+	                    double energy, double spot_size);
+	void scene_stop_all_threads(void *object);
+	void scene_set_resolution(void *object, size_t width, size_t height);
+	void scene_set_sample(void *object, size_t total_sample);
+	int scene_get_threads_num(void *object);
+	void scene_set_grid(void *object, int row_number, int col_number);
+
+#ifdef __cplusplus
+}
+#endif
 #endif // SCENE_H

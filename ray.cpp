@@ -27,6 +27,7 @@ Ray& Ray::operator =(const Ray &r)
 	o = r.o;
 	d = r.d;
 	inv_d = r.inv_d;
+	return *this;
 }
 
 void Ray::normalize()
