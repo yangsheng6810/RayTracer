@@ -7,220 +7,220 @@ const int MAX_DEPTH = 100;
 
 SAHKDTree::SAHKDTree()
 {
-	sceneBox = BBox();
+    sceneBox = BBox();
 }
 
 SAHKDTree::~SAHKDTree()
 {
-	m_nodes.clear();
-	for(size_t i = 0; i < m_leafData.size(); ++i)
-		m_leafData[i].reset();
-	m_leafData.clear();
+    m_nodes.clear();
+    for(size_t i = 0; i < m_leafData.size(); ++i)
+        m_leafData[i].reset();
+    m_leafData.clear();
 }
 
 void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects)
 {
-	// std::cout<<"in SAHKDTree::build"<<std::endl;
-	std::vector<BBox> objectBBoxes(objects.size());
-	BuildState curState;
-	curState.objects.reset(new std::vector<size_t>);
-	sceneBox = BBox();
-	for(size_t i = 0; i < objects.size(); ++i)
-		objectBBoxes[i] = BBox();
+    // std::cout<<"in SAHKDTree::build"<<std::endl;
+    std::vector<BBox> objectBBoxes(objects.size());
+    BuildState curState;
+    curState.objects.reset(new std::vector<size_t>);
+    sceneBox = BBox();
+    for(size_t i = 0; i < objects.size(); ++i)
+        objectBBoxes[i] = BBox();
 
-	for(size_t i = 0; i < objectBBoxes.size(); ++i){
-		objectBBoxes[i] = objects[i]->getBBox();
-		// std::cout<<objectBBoxes[i].toString()<<std::endl;
-		sceneBox.extends(objectBBoxes[i]);
-		curState.objects->push_back(i);
-	}
-	// std::cout<<sceneBox.toString()<<std::endl;
+    for(size_t i = 0; i < objectBBoxes.size(); ++i){
+        objectBBoxes[i] = objects[i]->getBBox();
+        // std::cout<<objectBBoxes[i].toString()<<std::endl;
+        sceneBox.extends(objectBBoxes[i]);
+        curState.objects->push_back(i);
+    }
+    // std::cout<<sceneBox.toString()<<std::endl;
 
-	curState.volume = sceneBox;
-	curState.nodeIndex = 0;
-	curState.depth = 0;
+    curState.volume = sceneBox;
+    curState.nodeIndex = 0;
+    curState.depth = 0;
 
-	m_nodes.resize(1);
+    m_nodes.resize(1);
 
-	std::stack<BuildState> buildStack;
+    std::stack<BuildState> buildStack;
 
-	// loop till stack is empty
-	for(;;){
+    // loop till stack is empty
+    for(;;){
 
         KDPlane plane = findPlane(curState.objects,
-		                          curState.volume,
-		                          objectBBoxes);
-		int splitDim = plane.dimension;
-		float splitVal = plane.value;
+                                  curState.volume,
+                                  objectBBoxes);
+        int splitDim = plane.dimension;
+        float splitVal = plane.value;
 
-		//Boundary condition
-		if (plane.cost > KI * curState.objects->size() ||
-		    curState.depth > MAX_DEPTH)
-		{
-			// std::cout<<"in boundary condition!"<<std::endl;
+        //Boundary condition
+        if (plane.cost > KI * curState.objects->size() ||
+            curState.depth > MAX_DEPTH)
+        {
+            // std::cout<<"in boundary condition!"<<std::endl;
             const size_t NODE_TYPE_MASK = ((size_t)1 << Node::LEAF_FLAG_BIT);
 
-			m_nodes[curState.nodeIndex].dataIndex =
-			        m_leafData.size() | NODE_TYPE_MASK;
-			for(size_t i = 0; i < curState.objects->size(); ++i){
-				m_leafData.push_back(objects[(*curState.objects)[i]]);
-			}
-			// delete curState.objects;
-			curState.objects.reset();
+            m_nodes[curState.nodeIndex].dataIndex =
+                    m_leafData.size() | NODE_TYPE_MASK;
+            for(size_t i = 0; i < curState.objects->size(); ++i){
+                m_leafData.push_back(objects[(*curState.objects)[i]]);
+            }
+            // delete curState.objects;
+            curState.objects.reset();
 
-			// as delimiter, same as
-			// m_leafData.push_back(NULL);
-			m_leafData.push_back(boost::shared_ptr<BaseObject>());
+            // as delimiter, same as
+            // m_leafData.push_back(NULL);
+            m_leafData.push_back(boost::shared_ptr<BaseObject>());
 
-			if (buildStack.empty())
-				break;
+            if (buildStack.empty())
+                break;
 
-			// update the stack
-			curState = buildStack.top();
-			buildStack.pop();
+            // update the stack
+            curState = buildStack.top();
+            buildStack.pop();
 
-			continue;
-		}
+            continue;
+        }
 
-		// create a new state for the right child
-		BuildState rightState;
-		rightState.volume = curState.volume.split(splitDim, splitVal);
-		rightState.objects.reset(new std::vector<size_t>);
-		boost::shared_ptr<std::vector<size_t> > leftObjects(new std::vector<size_t>);
+        // create a new state for the right child
+        BuildState rightState;
+        rightState.volume = curState.volume.split(splitDim, splitVal);
+        rightState.objects.reset(new std::vector<size_t>);
+        boost::shared_ptr<std::vector<size_t> > leftObjects(new std::vector<size_t>);
 
-		++curState.depth;
-		rightState.depth = curState.depth;
+        ++curState.depth;
+        rightState.depth = curState.depth;
 
-		for (size_t i = 0; i < curState.objects->size(); ++i){
-			size_t objectIndex = (*curState.objects)[i];
-			BBox objectBox = objectBBoxes[objectIndex];
-			if (objectBox.min[splitDim] == splitVal &&
-			    objectBox.min[splitDim] == objectBox.max[splitDim]){
-				// object is planar and lies in the spliting plane
-				if (plane.left){
-					leftObjects->push_back(objectIndex);
-				} else {
-					rightState.objects->push_back(objectIndex);
-				}
-			} else {
-				// assign the object to the correct side
-				if (objectBox.max[splitDim] > splitVal){
-					rightState.objects->push_back(objectIndex);
-				}
-				if (objectBox.min[splitDim] < splitVal){
-					leftObjects->push_back(objectIndex);
-				}
-			}
-		}
+        for (size_t i = 0; i < curState.objects->size(); ++i){
+            size_t objectIndex = (*curState.objects)[i];
+            BBox objectBox = objectBBoxes[objectIndex];
+            if (objectBox.min[splitDim] == splitVal &&
+                objectBox.min[splitDim] == objectBox.max[splitDim]){
+                // object is planar and lies in the spliting plane
+                if (plane.left){
+                    leftObjects->push_back(objectIndex);
+                } else {
+                    rightState.objects->push_back(objectIndex);
+                }
+            } else {
+                // assign the object to the correct side
+                if (objectBox.max[splitDim] > splitVal){
+                    rightState.objects->push_back(objectIndex);
+                }
+                if (objectBox.min[splitDim] < splitVal){
+                    leftObjects->push_back(objectIndex);
+                }
+            }
+        }
 
-		// delete curState.objects;
-		curState.objects = leftObjects;
-		leftObjects.reset();
+        // delete curState.objects;
+        curState.objects = leftObjects;
+        leftObjects.reset();
 
-		m_nodes[curState.nodeIndex].dataIndex = m_nodes.size();
-		m_nodes[curState.nodeIndex].dimension = splitDim;
-		m_nodes[curState.nodeIndex].splitVal = splitVal;
+        m_nodes[curState.nodeIndex].dataIndex = m_nodes.size();
+        m_nodes[curState.nodeIndex].dimension = splitDim;
+        m_nodes[curState.nodeIndex].splitVal = splitVal;
 
-		curState.nodeIndex = m_nodes.size();
-		rightState.nodeIndex = curState.nodeIndex + 1;
+        curState.nodeIndex = m_nodes.size();
+        rightState.nodeIndex = curState.nodeIndex + 1;
 
-		buildStack.push(rightState);
+        buildStack.push(rightState);
 
-		// enlarge m_nodes to hold the left and right child
-		m_nodes.resize(rightState.nodeIndex + 1);
-	}
-	// for(int i = 0; i != m_leafData.size(); ++i){
-	//     if (m_leafData[i]){
+        // enlarge m_nodes to hold the left and right child
+        m_nodes.resize(rightState.nodeIndex + 1);
+    }
+    // for(int i = 0; i != m_leafData.size(); ++i){
+    //     if (m_leafData[i]){
     //         std::cout<<i<<", "<<m_leafData[i]->getBBox().toString()<<std::endl;
-	//    }
-	// }
+    //    }
+    // }
 }
 
 bool SAHKDTree::hit(const Ray &ray, double& tmin, ShadePacket& sp) const
 {
-	std::stack<TravElem> traverseStack;
+    std::stack<TravElem> traverseStack;
 
-	TravElem curNode;
-	curNode.nodeIndex = 0;
+    TravElem curNode;
+    curNode.nodeIndex = 0;
 
-	// need update
-	if (!sceneBox.intersect(ray, curNode.t_near, curNode.t_far))
-		return false;
-	// std::cout<<"in SAHKDTree::hit"<<std::endl;
-	// std::cout<<"("<<curNode.t_near<<", "<<curNode.t_far<<")"<<std::endl;
+    // need update
+    if (!sceneBox.intersect(ray, curNode.t_near, curNode.t_far))
+        return false;
+    // std::cout<<"in SAHKDTree::hit"<<std::endl;
+    // std::cout<<"("<<curNode.t_near<<", "<<curNode.t_far<<")"<<std::endl;
 
-	Vector3 inverse = ray.inv_d;
-	bool leftIsNear[3];
-	leftIsNear[0] = ray.d.x > 0;
-	leftIsNear[1] = ray.d.y > 0;
-	leftIsNear[2] = ray.d.z > 0;
+    Vector3 inverse = ray.inv_d;
+    bool leftIsNear[3];
+    leftIsNear[0] = ray.d.x > 0;
+    leftIsNear[1] = ray.d.y > 0;
+    leftIsNear[2] = ray.d.z > 0;
 
-	const float EPS = 0.000001f;
+    const float EPS = 0.000001f;
 
-	double tmin_ = FLT_MAX, tmin_temp;
-	ShadePacket sp_, sp_temp;
+    double tmin_ = FLT_MAX, tmin_temp;
+    ShadePacket sp_, sp_temp;
 
-	for(;;){
-		const SAHKDTree::Node& node = m_nodes[curNode.nodeIndex];
-		if (node.isLeaf()){
-			bool changed = false;
-			size_t idx = node.getLeftChildOrLeaf();
-			// std::cout<<"in node.isLeaf()"<<std::endl;
-			while (m_leafData[idx]){
-				// std::cout<<"try hitting!"<<std::endl;
-				if (m_leafData[idx]->hit(ray, tmin_temp, sp_temp) &&
-				    tmin_temp < tmin_){
-					// std::cout<<"hit!!, tmin_ = "<<tmin_temp<<std::endl;
-					tmin_ = tmin_temp;
-					sp_ = sp_temp;
-					changed = true;
-				}
-				idx++;
-			}
+    for(;;){
+        const SAHKDTree::Node& node = m_nodes[curNode.nodeIndex];
+        if (node.isLeaf()){
+            bool changed = false;
+            size_t idx = node.getLeftChildOrLeaf();
+            // std::cout<<"in node.isLeaf()"<<std::endl;
+            while (m_leafData[idx]){
+                // std::cout<<"try hitting!"<<std::endl;
+                if (m_leafData[idx]->hit(ray, tmin_temp, sp_temp) &&
+                    tmin_temp < tmin_){
+                    // std::cout<<"hit!!, tmin_ = "<<tmin_temp<<std::endl;
+                    tmin_ = tmin_temp;
+                    sp_ = sp_temp;
+                    changed = true;
+                }
+                idx++;
+            }
 
-			if (changed && tmin_ < curNode.t_far){
-				break;
-			}
+            if (changed && tmin_ < curNode.t_far){
+                break;
+            }
 
-			if (traverseStack.empty())
-				break;
+            if (traverseStack.empty())
+                break;
 
-			curNode = traverseStack.top();
-			traverseStack.pop();
-		} else {
-			float t_split =
-			        (node.splitVal - ray.o.get(node.dimension))
-			        * inverse[node.dimension];
+            curNode = traverseStack.top();
+            traverseStack.pop();
+        } else {
+            float t_split =
+                    (node.splitVal - ray.o.get(node.dimension))
+                    * inverse[node.dimension];
 
-			//The split is closer to the far child. The near child is ignored.
-			if (curNode.t_near - t_split > EPS){
-				curNode.nodeIndex = node.getLeftChildOrLeaf()
-				                    + leftIsNear[node.dimension];
-				continue;
-			}
-			//The split is closer to the near child. The far child is ignored.
+            //The split is closer to the far child. The near child is ignored.
+            if (curNode.t_near - t_split > EPS){
+                curNode.nodeIndex = node.getLeftChildOrLeaf()
+                                    + leftIsNear[node.dimension];
+                continue;
+            }
+            //The split is closer to the near child. The far child is ignored.
             else if (t_split - curNode.t_far > EPS){
-				curNode.nodeIndex = node.getLeftChildOrLeaf()
-				                    + 1 - leftIsNear[node.dimension];
-				continue;
-			}
-			//Otherwise, the right child is put on the stack.
-			TravElem rightElement;
+                curNode.nodeIndex = node.getLeftChildOrLeaf()
+                                    + 1 - leftIsNear[node.dimension];
+                continue;
+            }
+            //Otherwise, the right child is put on the stack.
+            TravElem rightElement;
 
-			rightElement.nodeIndex = node.getLeftChildOrLeaf()
-			                         + leftIsNear[node.dimension];
-			rightElement.t_near = t_split;
-			rightElement.t_far = curNode.t_far;
-			traverseStack.push(rightElement);
+            rightElement.nodeIndex = node.getLeftChildOrLeaf()
+                                     + leftIsNear[node.dimension];
+            rightElement.t_near = t_split;
+            rightElement.t_far = curNode.t_far;
+            traverseStack.push(rightElement);
 
-			curNode.nodeIndex = node.getLeftChildOrLeaf()
-			                    + 1 - leftIsNear[node.dimension];
-			curNode.t_far = t_split;
-		}
-	}
-	tmin = tmin_;
-	sp = sp_;
-	return tmin < FLT_MAX;
+            curNode.nodeIndex = node.getLeftChildOrLeaf()
+                                + 1 - leftIsNear[node.dimension];
+            curNode.t_far = t_split;
+        }
+    }
+    tmin = tmin_;
+    sp = sp_;
+    return tmin < FLT_MAX;
 }
 
 float SAHKDTree::C(float Pl, float Pr, int Nl, int Nr) const
@@ -263,7 +263,7 @@ bool compE(SAHKDTree::SortElem e1, SAHKDTree::SortElem e2)
     } else if (e1.value == e2.value) {
         return e1.type < e2.type;
     } else
-		return false;
+        return false;
 }
 
 

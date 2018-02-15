@@ -8,16 +8,16 @@
 class Ray
 {
 public:
-	Ray();
-	Ray(const Point3& oo, const Vector3& dd);
-	Ray(const Ray& r);
-	Ray& operator = (const Ray& r);
-	void normalize();
+    Ray();
+    Ray(const Point3& oo, const Vector3& dd);
+    Ray(const Ray& r);
+    Ray& operator = (const Ray& r);
+    void normalize();
     std::string toString() const;
 
-	Point3 o;
-	Vector3 d;
-	Vector3 inv_d;
+    Point3 o;
+    Vector3 d;
+    Vector3 inv_d;
 };
 
 #endif // RAY_H

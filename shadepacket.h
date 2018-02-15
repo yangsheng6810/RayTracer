@@ -9,15 +9,15 @@
 class ShadePacket
 {
 public:
-	ShadePacket();
-	ShadePacket(const ShadePacket& sp);
-	ShadePacket& operator = (const ShadePacket& sp);
+    ShadePacket();
+    ShadePacket(const ShadePacket& sp);
+    ShadePacket& operator = (const ShadePacket& sp);
 
-	bool hit;
-	Point3 hitPoint;
-	Vector3 normal;
+    bool hit;
+    Point3 hitPoint;
+    Vector3 normal;
 
-	bool inside;
+    bool inside;
     Material m;
 };
 

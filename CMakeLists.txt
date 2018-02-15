@@ -4,9 +4,9 @@ project(RayTracer)
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 set(MY_SOURCES
-		point3.cpp
-		vector3.cpp
-		color.cpp
+        point3.cpp
+        vector3.cpp
+        color.cpp
         bbox.cpp
         threadpool.h
         constants.h
@@ -17,20 +17,20 @@ set(MY_SOURCES
         pointlight.cpp
         spotlight.cpp
         rectlight.cpp
-		baseobject.cpp
-		sphere.cpp
-		plane.cpp
-		scene.cpp
-		ray.cpp
-		material.cpp
-		shadepacket.cpp
-		trianglemesh.cpp
+        baseobject.cpp
+        sphere.cpp
+        plane.cpp
+        scene.cpp
+        ray.cpp
+        material.cpp
+        shadepacket.cpp
+        trianglemesh.cpp
         rectangle.cpp
-		output.cpp
+        output.cpp
         camera.cpp
-		tracer.cpp)
+        tracer.cpp)
 
-	#aux_source_directory(${PROJECT_SOURCE_DIR} SRC_LIST)
+    #aux_source_directory(${PROJECT_SOURCE_DIR} SRC_LIST)
 
 #message("PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
 #message("SRC_LIST points to " "${SRC_LIST}")
@@ -50,17 +50,17 @@ IF(Boost_FOUND)
     #find_package(Boost REQUIRED thread system)
 
     add_definitions(-DWITH_SAMPLE)
-	add_library(my-library SHARED ${MY_SOURCES})
-	target_link_libraries(my-library
+    add_library(my-library SHARED ${MY_SOURCES})
+    target_link_libraries(my-library
             ${CMAKE_THREAD_LIBS_INIT}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${Boost_LIBRARIES}
     )
 
-	add_executable(${PROJECT_NAME} main.cpp ) #${SRC_LIST})
+    add_executable(${PROJECT_NAME} main.cpp ) #${SRC_LIST})
     target_link_libraries(${PROJECT_NAME}
-    		my-library
+            my-library
             ${CMAKE_THREAD_LIBS_INIT}
             #${PNG_LIBRARIES}
             #${ZLIB_LIBRARIES}

@@ -12,11 +12,11 @@ PointLight::PointLight(Point3 point_, float ls_, Color color_):
 
 Vector3 PointLight::get_direction(const ShadePacket &sp, int sample_n) const
 {
-	Vector3 ret = Vector3(sp.hitPoint, point);
-	return ret;
+    Vector3 ret = Vector3(sp.hitPoint, point);
+    return ret;
 }
 
 Color PointLight::L(const ShadePacket &sp) const
 {
-	return (ls * color);
+    return (ls * color);
 }

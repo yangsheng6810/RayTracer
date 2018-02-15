@@ -33,27 +33,27 @@ Material::Material(const Material &m):
 
 Material& Material::operator =(const Material& m)
 {
-	emission = m.emission;
-	diffuse_color = m.diffuse_color;
+    emission = m.emission;
+    diffuse_color = m.diffuse_color;
     diffuse_intensity = m.diffuse_intensity;
     specular_color = m.specular_color;
     specular_intensity = m.specular_intensity;
     hardness = m.hardness;
     reflect = m.reflect;
     transparent = m.transparent;
-	isLight = m.isLight;
-	return *this;
+    isLight = m.isLight;
+    return *this;
 }
 
 
 std::string Material::toString() const
 {
-	std::ostringstream strs;
-	strs <<"(color = "<<diffuse_color.toString()
-	    <<"reflect = "<<reflect
-	    <<"transparent = "<<transparent
-		<<"isLight = "<<isLight
-	    <<"emission = "<< emission.toString();
-	std::string str = strs.str();
-	return str;
+    std::ostringstream strs;
+    strs <<"(color = "<<diffuse_color.toString()
+        <<"reflect = "<<reflect
+        <<"transparent = "<<transparent
+        <<"isLight = "<<isLight
+        <<"emission = "<< emission.toString();
+    std::string str = strs.str();
+    return str;
 }

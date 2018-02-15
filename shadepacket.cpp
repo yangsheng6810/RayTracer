@@ -17,9 +17,9 @@ ShadePacket::ShadePacket(const ShadePacket &sp):
 ShadePacket& ShadePacket::operator = (const ShadePacket& sp)
 {
     hit = sp.hit;
-	hitPoint = sp.hitPoint;
+    hitPoint = sp.hitPoint;
     normal = sp.normal;
-	inside = sp.inside;
-	m = sp.m;
-	return *this;
+    inside = sp.inside;
+    m = sp.m;
+    return *this;
 }

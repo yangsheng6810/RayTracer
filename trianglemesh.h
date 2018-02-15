@@ -12,8 +12,8 @@
 
 class Face {
 public:
-	Face(int v0_, int v1_, int v2_): v0(v0_), v1(v1_), v2(v2_){}
-	int v0, v1, v2;
+    Face(int v0_, int v1_, int v2_): v0(v0_), v1(v1_), v2(v2_){}
+    int v0, v1, v2;
 };
 
 class SAHKDTree;
@@ -22,35 +22,35 @@ class TriangleMesh : public BaseObject,
         public boost::enable_shared_from_this<TriangleMesh>
 {
 public:
-	// TriangleMesh(boost::shared_ptr<Material> m_ = boost::shared_ptr<Material>(), bool smooth_ = false);
-	TriangleMesh(bool smooth_ = false);
-	~TriangleMesh();
-	void addVertice(const Point3& p, const Vector3& v);
-	void addFace(size_t v0, size_t v1, size_t v2, size_t material_index);
-	void addMaterial(const boost::shared_ptr<Material> &m_);
-	void finishObject();
-	bool hit(const Ray &ray, double &tmin, ShadePacket &sp) const;
-	bool shadow_hit(const Ray &ray, double &tmin) const;
-	void shift(const Vector3& v);
+    // TriangleMesh(boost::shared_ptr<Material> m_ = boost::shared_ptr<Material>(), bool smooth_ = false);
+    TriangleMesh(bool smooth_ = false);
+    ~TriangleMesh();
+    void addVertice(const Point3& p, const Vector3& v);
+    void addFace(size_t v0, size_t v1, size_t v2, size_t material_index);
+    void addMaterial(const boost::shared_ptr<Material> &m_);
+    void finishObject();
+    bool hit(const Ray &ray, double &tmin, ShadePacket &sp) const;
+    bool shadow_hit(const Ray &ray, double &tmin) const;
+    void shift(const Vector3& v);
 
-	bool shadow_hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin) const;
-	bool hitFace(size_t v0_, size_t v1, size_t v2_, const Ray &ray,
-	             double &tmin, ShadePacket &sp, size_t material_index) const;
+    bool shadow_hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray, double &tmin) const;
+    bool hitFace(size_t v0_, size_t v1, size_t v2_, const Ray &ray,
+                 double &tmin, ShadePacket &sp, size_t material_index) const;
 
-	std::string toString() const;
-	std::vector<Point3> vertices;
-	// std::vector<Face> faces;
-	std::vector<boost::shared_ptr<BaseObject> > triangles;
-	std::vector<Vector3> normals;
-	// std::vector<Vector3> face_normals;
+    std::string toString() const;
+    std::vector<Point3> vertices;
+    // std::vector<Face> faces;
+    std::vector<boost::shared_ptr<BaseObject> > triangles;
+    std::vector<Vector3> normals;
+    // std::vector<Vector3> face_normals;
 private:
-	void updateLimit(const Point3& p);
-	float x_min, x_max, y_min, y_max, z_min, z_max;
-	// boost::shared_ptr<Material> m_ptr;
-	std::vector<boost::shared_ptr<Material> > materials;
-	boost::scoped_ptr<SAHKDTree> tree_ptr;
-	double kEpsilon;
-	bool smooth;
+    void updateLimit(const Point3& p);
+    float x_min, x_max, y_min, y_max, z_min, z_max;
+    // boost::shared_ptr<Material> m_ptr;
+    std::vector<boost::shared_ptr<Material> > materials;
+    boost::scoped_ptr<SAHKDTree> tree_ptr;
+    double kEpsilon;
+    bool smooth;
 
 };
 

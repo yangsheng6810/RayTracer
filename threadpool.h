@@ -23,8 +23,8 @@ public:
     ThreadPool(size_t);
     template<class F>
     void enqueue(F f);
-	void wait(int i);
-	void clear();
+    void wait(int i);
+    void clear();
     ~ThreadPool();
 private:
     // need to keep track of threads so we can join them
@@ -58,28 +58,28 @@ void ThreadPool::enqueue(F f)
 
 void ThreadPool::wait(int i)
 {
-	work.reset();
-	for(size_t ii = 0; ii < workers.size(); ++ii)
-		workers[ii]->join();
-	work.reset(new boost::asio::io_service::work(service));
+    work.reset();
+    for(size_t ii = 0; ii < workers.size(); ++ii)
+        workers[ii]->join();
+    work.reset(new boost::asio::io_service::work(service));
 }
 
 void ThreadPool::clear()
 {
-	service.stop();
+    service.stop();
 }
 
 // the destructor joins all threads
 ThreadPool::~ThreadPool()
 {
-	// std::cout<<"in ThreadPool destructor"<<std::endl;
+    // std::cout<<"in ThreadPool destructor"<<std::endl;
     service.stop();
-	for(size_t i = 0;i<workers.size();++i){
+    for(size_t i = 0;i<workers.size();++i){
         workers[i]->join();
-		workers[i].reset();
-	}
-	workers.clear();
-	// std::cout<<"exit from ThreadPool destructor"<<std::endl;
+        workers[i].reset();
+    }
+    workers.clear();
+    // std::cout<<"exit from ThreadPool destructor"<<std::endl;
 }
 
 #endif // THREADPOOL_H

@@ -27,67 +27,67 @@ char const* add_objects(object s)
 
 Color get_color(object v)
 {
-	return Color(extract<double>(v.attr("r")),
-	             extract<double>(v.attr("g")),
-	             extract<double>(v.attr("b")));
+    return Color(extract<double>(v.attr("r")),
+                 extract<double>(v.attr("g")),
+                 extract<double>(v.attr("b")));
 }
 
 void add_object()
 {
-	scene->addObject(true);
+    scene->addObject(true);
 }
 
 void add_material(object material)
 {
-	boost::shared_ptr<Material> m;
-	if (material.is_none()){
-		m = boost::shared_ptr<Material>(
-		            new Material(
-		                Color(0.8),
-		                0.05,
-		                Color(0.9),
-		                0.1,
-		                100,
-		                false,
-		                false));
-	} else {
-	    m = boost::shared_ptr<Material>(
-		        new Material(
-		            get_color(material.attr("diffuse_color")),
-	                extract<double>(material.attr("diffuse_intensity")),
-	                get_color(material.attr("specular_color")),
-	                extract<double>(material.attr("specular_intensity")),
-	                extract<double>(material.attr("specular_hardness")),
-	                extract<bool>(material.attr("raytrace_mirror").attr("use")),
-	                extract<bool>(material.attr("use_transparency")),
-	                Color(extract<double>(material.attr("emit")))
-	                ));
-	}
-	scene->addMaterial(m);
+    boost::shared_ptr<Material> m;
+    if (material.is_none()){
+        m = boost::shared_ptr<Material>(
+                    new Material(
+                        Color(0.8),
+                        0.05,
+                        Color(0.9),
+                        0.1,
+                        100,
+                        false,
+                        false));
+    } else {
+        m = boost::shared_ptr<Material>(
+                new Material(
+                    get_color(material.attr("diffuse_color")),
+                    extract<double>(material.attr("diffuse_intensity")),
+                    get_color(material.attr("specular_color")),
+                    extract<double>(material.attr("specular_intensity")),
+                    extract<double>(material.attr("specular_hardness")),
+                    extract<bool>(material.attr("raytrace_mirror").attr("use")),
+                    extract<bool>(material.attr("use_transparency")),
+                    Color(extract<double>(material.attr("emit")))
+                    ));
+    }
+    scene->addMaterial(m);
 }
 
 void add_vertice(object point, object normal)
 {
-	Point3 c_point = Point3(extract<double>(point.attr("x")),
-	                        extract<double>(point.attr("y")),
-	                        extract<double>(point.attr("z")));
-	Vector3 c_normal = Vector3(extract<double>(normal.attr("x")),
-	                           extract<double>(normal.attr("y")),
-	                           extract<double>(normal.attr("z")));
-	scene->addVertice(c_point, c_normal);
+    Point3 c_point = Point3(extract<double>(point.attr("x")),
+                            extract<double>(point.attr("y")),
+                            extract<double>(point.attr("z")));
+    Vector3 c_normal = Vector3(extract<double>(normal.attr("x")),
+                               extract<double>(normal.attr("y")),
+                               extract<double>(normal.attr("z")));
+    scene->addVertice(c_point, c_normal);
 }
 
 void add_face(object v1, object v2, object v3, object m_index)
 {
-	scene->addFace(extract<int>(v1),
-	               extract<int>(v2),
-	               extract<int>(v3),
-	               extract<int>(m_index));
+    scene->addFace(extract<int>(v1),
+                   extract<int>(v2),
+                   extract<int>(v3),
+                   extract<int>(m_index));
 }
 
 void finish_object()
 {
-	scene->finishObject();
+    scene->finishObject();
 }
 
 std::string parse_python_exception(){
@@ -131,8 +131,8 @@ std::string parse_python_exception(){
 
 void addTile(int x_start, int y_start, int width, int height)
 {
-	// std::cout<<"Before calling back!"<<std::endl;
-	PyEval_InitThreads();
+    // std::cout<<"Before calling back!"<<std::endl;
+    PyEval_InitThreads();
 
     PyGILState_STATE state = PyGILState_Ensure();
     try{
@@ -142,12 +142,12 @@ void addTile(int x_start, int y_start, int width, int height)
         std::cout << "Error in Python: " << perror_str << std::endl;
     }
     PyGILState_Release(state);
-	// std::cout<<"After calling back!"<<std::endl;
+    // std::cout<<"After calling back!"<<std::endl;
 }
 
 void send_success()
 {
-	PyEval_InitThreads();
+    PyEval_InitThreads();
 
     PyGILState_STATE state = PyGILState_Ensure();
     try{
@@ -161,108 +161,108 @@ void send_success()
 
 void new_scene(PyObject *engine)
 {
-	scene.reset(new Scene(1366, 678));
-	renderEngine = engine;
-	// need not increase ref
-	// Py_INCREF(renderEngine);
+    scene.reset(new Scene(1366, 678));
+    renderEngine = engine;
+    // need not increase ref
+    // Py_INCREF(renderEngine);
 
-	scene->setSendTile(addTile);
+    scene->setSendTile(addTile);
 }
 
 void callback()
 {
-	// scene = boost::shared_ptr<Scene>();
-	std::cout<<"count of scene is "<<scene.use_count()<<std::endl;
-	// need not increase ref
-	// Py_DECREF(renderEngine);
-	std::cout<<"clear scene in callback!"<<std::endl;
-	std::cout<<"Success!"<<std::endl;
-	send_success();
+    // scene = boost::shared_ptr<Scene>();
+    std::cout<<"count of scene is "<<scene.use_count()<<std::endl;
+    // need not increase ref
+    // Py_DECREF(renderEngine);
+    std::cout<<"clear scene in callback!"<<std::endl;
+    std::cout<<"Success!"<<std::endl;
+    send_success();
 }
 
 char const* render_scene(void)
 {
-	scene->setCallback(callback);
-	scene->renderScene();
-	return "Running!";
+    scene->setCallback(callback);
+    scene->renderScene();
+    return "Running!";
 }
 Vector3 get_vect(object v)
 {
-	return Vector3(extract<double>(v.attr("x")),
-	               extract<double>(v.attr("y")),
-	               extract<double>(v.attr("z")));
+    return Vector3(extract<double>(v.attr("x")),
+                   extract<double>(v.attr("y")),
+                   extract<double>(v.attr("z")));
 }
 
 Point3 get_point(object p)
 {
-	return Point3(extract<double>(p.attr("x")),
-	              extract<double>(p.attr("y")),
-	              extract<double>(p.attr("z")));
+    return Point3(extract<double>(p.attr("x")),
+                  extract<double>(p.attr("y")),
+                  extract<double>(p.attr("z")));
 }
 
 void add_camera(object location, object p1, object p2, object p3, object p4)
 {
-	Point3 loc = get_point(location),
-	        point1 = get_point(p1),
-	        point2 = get_point(p2),
-	        point3 = get_point(p3),
-	        point4 = get_point(p4);
-	scene->addCamera(loc,
-	                 Vector3(loc, point1),
-	                 Vector3(loc, point2),
-	                 Vector3(loc, point3),
-	                 Vector3(loc, point4));
+    Point3 loc = get_point(location),
+            point1 = get_point(p1),
+            point2 = get_point(p2),
+            point3 = get_point(p3),
+            point4 = get_point(p4);
+    scene->addCamera(loc,
+                     Vector3(loc, point1),
+                     Vector3(loc, point2),
+                     Vector3(loc, point3),
+                     Vector3(loc, point4));
 }
 
 void add_lamp(object location, object direction, object distance, object color, object energy, object spot_size)
 {
-	scene->addLamp(get_point(location),
-	               get_vect(direction),
-	               extract<double>(distance),
-	               get_color(color),
-	               extract<double>(energy),
-	               extract<double>(spot_size));
+    scene->addLamp(get_point(location),
+                   get_vect(direction),
+                   extract<double>(distance),
+                   get_color(color),
+                   extract<double>(energy),
+                   extract<double>(spot_size));
 }
 
 void stop_render()
 {
-	if (scene)
-	    scene->stopAllThreads();
-	// scene = boost::shared_ptr<Scene>();
-	// may not be a good idea
-	// scene.reset();
-	std::cout<<"clear scene!"<<std::endl;
+    if (scene)
+        scene->stopAllThreads();
+    // scene = boost::shared_ptr<Scene>();
+    // may not be a good idea
+    // scene.reset();
+    std::cout<<"clear scene!"<<std::endl;
 }
 
 void set_resolution(object width_, object height_)
 {
-	int width = extract<int>(width_);
-	int height = extract<int>(height_);
-	scene->setResolution(width, height);
+    int width = extract<int>(width_);
+    int height = extract<int>(height_);
+    scene->setResolution(width, height);
 }
 
 void set_sample(object sample_)
 {
-	total_sample = extract<int>(sample_);
-	scene->setSample(total_sample);
+    total_sample = extract<int>(sample_);
+    scene->setSample(total_sample);
 }
 
 object get_thread_num()
 {
-	// std::cout<<"in get_thread_num()"<<std::endl;
-	return object(scene->getThreadNum());
+    // std::cout<<"in get_thread_num()"<<std::endl;
+    return object(scene->getThreadNum());
 }
 
 void set_grid(object row_n, object col_n)
 {
-	int row_number = extract<int>(row_n);
-	int col_number = extract<int>(col_n);
-	scene->setGrid(row_number, col_number);
+    int row_number = extract<int>(row_n);
+    int col_number = extract<int>(col_n);
+    scene->setGrid(row_number, col_number);
 }
 
 void clear_scene()
 {
-	scene.reset();
+    scene.reset();
 }
 
 BOOST_PYTHON_MODULE(librender)

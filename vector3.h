@@ -7,28 +7,28 @@
 class Vector3
 {
 public:
-	Vector3();
-	Vector3(const Vector3& v);
-	Vector3(float xx, float yy, float zz);
-	Vector3(const Point3& p1, const Point3& p2);
+    Vector3();
+    Vector3(const Vector3& v);
+    Vector3(float xx, float yy, float zz);
+    Vector3(const Point3& p1, const Point3& p2);
     Vector3& operator +=(const Vector3& v);
-	Vector3 operator -(const Vector3& v) const;
-	Vector3 operator -() const;
-	float operator *(const Vector3& v) const;
+    Vector3 operator -(const Vector3& v) const;
+    Vector3 operator -() const;
+    float operator *(const Vector3& v) const;
     Vector3& operator *=(const float& v);
-	Vector3& operator =(const Vector3& v);
-	float& operator[] (const int& index);
+    Vector3& operator =(const Vector3& v);
+    float& operator[] (const int& index);
     float dot(const Vector3& v) const;
     Vector3 tensor(const Vector3& v) const;
-	Vector3& normalize();
-	void addNoise();
-	double lenSquare() const;
+    Vector3& normalize();
+    void addNoise();
+    double lenSquare() const;
 
-	std::string toString() const;
+    std::string toString() const;
 
-	float x, y, z;
-	// used for random
-	static unsigned short Xi[3];
+    float x, y, z;
+    // used for random
+    static unsigned short Xi[3];
 };
 
 Vector3 operator +(const Vector3& v1, const Vector3& v2);

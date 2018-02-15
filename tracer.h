@@ -12,16 +12,16 @@ class Scene;
 class Tracer
 {
 public:
-	enum RenderType {GLOBAL, LIMITED, DIRECT};
-	Tracer();
-	~Tracer();
-	void setScene(const boost::shared_ptr<Scene>& s_ptr);
+    enum RenderType {GLOBAL, LIMITED, DIRECT};
+    Tracer();
+    ~Tracer();
+    void setScene(const boost::shared_ptr<Scene>& s_ptr);
 
-	virtual Color trace_ray(const Ray& ray, float weight, int sample_n) const;
-	boost::weak_ptr<Scene> scene_weak_ptr;
-	// boost::shared_ptr<Scene> scene_ptr;
-	void setRenderType(const RenderType& rt_);
-	RenderType type;
+    virtual Color trace_ray(const Ray& ray, float weight, int sample_n) const;
+    boost::weak_ptr<Scene> scene_weak_ptr;
+    // boost::shared_ptr<Scene> scene_ptr;
+    void setRenderType(const RenderType& rt_);
+    RenderType type;
 private:
     Color diffuse_direct(const Ray &ray, const ShadePacket& sp_) const;
     Color diffuse_global(const ShadePacket& sp_, const double& weight) const;

@@ -2,7 +2,7 @@
 
 BaseObject::BaseObject()
 {
-	bBox = BBox::empty();
+    bBox = BBox::empty();
 }
 
 void BaseObject::shift(const Vector3 &v)

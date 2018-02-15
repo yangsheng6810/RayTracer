@@ -10,25 +10,25 @@ using namespace std;
 
 void printSuccess()
 {
-	cout<< "Success!"<<endl;
-	exit(0);
+    cout<< "Success!"<<endl;
+    exit(0);
 }
 
 
 int main()
 {
-	boost::shared_ptr<Scene> scene(new Scene(1366, 768));
-	scene->setCallback(printSuccess);
-	scene->setResolution(800, 600);
-	scene->renderScene();
-	// scene->renderScene();
-	// testVector();
-	cout << "Hello RayTracer!" << endl;
-	// sleep(10);
-	// scene->stopAllThreads();
-	sleep(10000);
-	cout << "stopped in main after sleep"<<endl;
-	return 0;
+    boost::shared_ptr<Scene> scene(new Scene(1366, 768));
+    scene->setCallback(printSuccess);
+    scene->setResolution(800, 600);
+    scene->renderScene();
+    // scene->renderScene();
+    // testVector();
+    cout << "Hello RayTracer!" << endl;
+    // sleep(10);
+    // scene->stopAllThreads();
+    sleep(10000);
+    cout << "stopped in main after sleep"<<endl;
+    return 0;
 }
 
 /**
@@ -37,14 +37,14 @@ int main()
  */
 void testVector()
 {
-	Point3 p1(0, 0, 0), p2(1, 4, 2);
-	Vector3 vec1(p1, p2);
-	Vector3 vec2(1, 1.7, 1);
-	Ray r(p2, vec1);
+    Point3 p1(0, 0, 0), p2(1, 4, 2);
+    Vector3 vec1(p1, p2);
+    Vector3 vec2(1, 1.7, 1);
+    Ray r(p2, vec1);
 
-	cout << p1.toString() << endl;
-	cout << p2.toString() << endl;
-	cout << vec1.toString() << endl;
-	cout << vec2.toString() << endl;
-	cout << r.toString() << endl;
+    cout << p1.toString() << endl;
+    cout << p2.toString() << endl;
+    cout << vec1.toString() << endl;
+    cout << vec2.toString() << endl;
+    cout << r.toString() << endl;
 }

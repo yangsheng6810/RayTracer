@@ -3,8 +3,10 @@ import bpy.context as C
 import bpy.data as D
 import librender
 
+
 def callback():
-	print("success!")
+    print("success!")
+
 
 def addCamera():
     camera = D.cameras[C.scene.camera.name]
@@ -17,10 +19,12 @@ def addCamera():
 
     librender.add_camera(origin, p1, p2, p3, p4)
 
-def	main():
-	librender.new_scene()
-	addCamera()
-	#librender.set_python_callback(callback)
-	librender.render_scene()
+
+def main():
+    librender.new_scene()
+    addCamera()
+    # librender.set_python_callback(callback)
+    librender.render_scene()
+
 
 main()
