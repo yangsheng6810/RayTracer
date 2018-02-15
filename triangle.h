@@ -13,8 +13,8 @@ public:
 	bool shadow_hit(const Ray& ray, double& tmin) const;
 	void shift(const Vector3& v);
 	size_t v0, v1, v2;
-	size_t material_index;
 	Vector3 normal;
+	size_t material_index;
 private:
 	boost::weak_ptr<TriangleMesh> w_object_ptr;
 };

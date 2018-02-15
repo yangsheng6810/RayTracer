@@ -9,8 +9,8 @@ Material::Material(Color diffuse_color_,
          bool reflect_,
          bool transparent_, Color emission_):
     diffuse_color(diffuse_color_),
-    diffuse_intensity(diffuse_intensity_),
     specular_color(specular_color_),
+    diffuse_intensity(diffuse_intensity_),
     specular_intensity(specular_intensity_),
     hardness(hardness_),
     reflect(reflect_),
@@ -19,22 +19,20 @@ Material::Material(Color diffuse_color_,
 {}
 
 Material::Material(const Material &m):
-    isLight(m.isLight),
-    emission(m.emission),
-
     diffuse_color(m.diffuse_color),
-    diffuse_intensity(m.diffuse_intensity),
     specular_color(m.specular_color),
+    diffuse_intensity(m.diffuse_intensity),
     specular_intensity(m.specular_intensity),
     hardness(m.hardness),
     reflect(m.reflect),
-    transparent(m.transparent)
+    transparent(m.transparent),
+    emission(m.emission),
+    isLight(m.isLight)
 {
 }
 
 Material& Material::operator =(const Material& m)
 {
-	isLight = m.isLight;
 	emission = m.emission;
 	diffuse_color = m.diffuse_color;
     diffuse_intensity = m.diffuse_intensity;
@@ -43,6 +41,8 @@ Material& Material::operator =(const Material& m)
     hardness = m.hardness;
     reflect = m.reflect;
     transparent = m.transparent;
+	isLight = m.isLight;
+	return *this;
 }
 
 

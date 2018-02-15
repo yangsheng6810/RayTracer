@@ -74,7 +74,7 @@ Color Tracer::diffuse_limited(const Ray& ray,
 	boost::shared_ptr<BaseObject> obj;
 	boost::shared_ptr<Scene> scene_ptr = scene_weak_ptr.lock();
 
-	for(int i = 0; i != scene_ptr->lights.size(); ++i){
+	for(size_t i = 0; i != scene_ptr->lights.size(); ++i){
 		l_ptr = scene_ptr->lights[i];
 		Color temp = Color(0);
 		// to speed up for debug
@@ -84,7 +84,7 @@ Color Tracer::diffuse_limited(const Ray& ray,
 			bool in_shadow = false;
 			double t;
 			double distance = sqrt(light_vec.lenSquare());
-			for(int j = 0; j != scene_ptr->objects.size(); ++j){
+			for(size_t j = 0; j != scene_ptr->objects.size(); ++j){
 				obj = scene_ptr->objects.at(j);
 				if (obj->shadow_hit(Ray(sp_.hitPoint, light_vec), t) && t < distance){
 					in_shadow = true;
@@ -137,7 +137,7 @@ Color Tracer::diffuse_direct(const Ray& ray,
 	Color intense_p;
 	boost::shared_ptr<Scene> scene_ptr = scene_weak_ptr.lock();
 
-	for(int i = 0; i != scene_ptr->lights.size(); ++i){
+	for(size_t i = 0; i != scene_ptr->lights.size(); ++i){
 		l_ptr = scene_ptr->lights[i];
 		Color temp = Color(0);
 		light_vec = l_ptr->get_direction(sp_, 0); // added to emulate?
@@ -169,7 +169,7 @@ Color Tracer::trace_ray(const Ray& ray, float weight, int sample_n) const
 	int object_index;
 
 
-	for (int i = 0; i != scene_ptr->objects.size(); i++){
+	for (size_t i = 0; i != scene_ptr->objects.size(); i++){
 		if (scene_ptr->objects[i]->hit(ray, t, sp)){
 			// std::cout<<t<<", "<<sp.color.toString()<<std::endl;
 			if (t < t_){

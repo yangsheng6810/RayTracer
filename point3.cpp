@@ -44,6 +44,7 @@ float& Point3::operator[] (const int& index)
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }
@@ -63,6 +64,7 @@ float Point3::get(const int& index) const
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }

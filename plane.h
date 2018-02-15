@@ -19,8 +19,8 @@ public:
 	Point3 point; // a point in the plane
 	Vector3 normal; // normal
 	// Color color;
-	bool isGrid;
 	boost::shared_ptr<Material> m_ptr;
+	bool isGrid;
 	static const double kEpsilon = 1e-4; // left for understanding
 
 };

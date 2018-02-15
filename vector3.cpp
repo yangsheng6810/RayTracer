@@ -128,6 +128,7 @@ float& Vector3::operator[] (const int& index)
 			break;
 		default:
 			// should not visit this
+			return x;
 			std::cout<<"error! in Point3::operator[]"<<std::endl;
 	}
 }

@@ -11,9 +11,9 @@ public:
 	Color L(const ShadePacket &sp);
 
 private:
+	Vector3 direction;
 	float ls;
 	Color color;
-	Vector3 direction;
 };
 
 #endif // PARALLEL_H

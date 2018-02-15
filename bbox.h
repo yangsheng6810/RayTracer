@@ -41,7 +41,8 @@ public:
         BBox ret;
 	    ret.min = Point3(FLT_MAX, FLT_MAX, FLT_MAX);
 	    ret.max = Point3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    }
+        return ret;
+	}
 	const Vector3 diagonal() const;
 	std::string toString() const;
 };

@@ -4,8 +4,8 @@
 Triangle::Triangle(const boost::shared_ptr<TriangleMesh>& obj_ptr,
                    size_t v0_, size_t v1_, size_t v2_,
                    const Vector3& normal_, size_t material_index_):
-    BaseObject(), w_object_ptr(obj_ptr), v0(v0_), v1(v1_), v2(v2_),
-    normal(normal_), material_index(material_index_)
+    BaseObject(), v0(v0_), v1(v1_), v2(v2_),
+    normal(normal_), material_index(material_index_), w_object_ptr(obj_ptr)
 {
 	bBox = BBox();
 	boost::shared_ptr<TriangleMesh> object_ptr = w_object_ptr.lock();

@@ -21,10 +21,10 @@ int count = 0;
 
 Scene::Scene(int w, int h)
     :
+    sendTile(NULL),
     width(w),
     height(h),
     sample(1),
-    sendTile(NULL),
 	output(new Output(w, h)),
 	tracer_ptr(new Tracer()),
 	pool(new ThreadPool(4)),
@@ -49,10 +49,10 @@ Scene::Scene(int w, int h)
 Scene::~Scene()
 {
 	std::cout<<"in destructor"<<std::endl;
-	for (int i = 0; i < objects.size(); ++i)
+	for (size_t i = 0; i < objects.size(); ++i)
 		objects[i].reset();
 	objects.clear();
-	for (int i = 0; i < lights.size(); ++i)
+	for (size_t i = 0; i < lights.size(); ++i)
 		lights[i].reset();
 	lights.clear();
 	clearThread();
@@ -223,7 +223,7 @@ void Scene::addCamera(Point3 location, Vector3 v1, Vector3 v2, Vector3 v3, Vecto
 }
 
 void Scene::buildTree() {
-	for(int i = 0; i < objects.size(); i++){
+	for(size_t i = 0; i < objects.size(); i++){
         pool_for_tree->enqueue(boost::bind(&Scene::buildTreeForObj,
 		                          this,
 		                          i));
@@ -350,7 +350,6 @@ void Scene::renderTile(int z_start, int x_start, int z_end, int x_end, int sampl
 {
 	Color color;
 	Ray ray;
-	int index = 0;
 	/*
 	std::vector<Color> tileColor = output->getTile(x_start,
 	                                               z_start,

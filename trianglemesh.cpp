@@ -4,8 +4,7 @@
 #include <sstream>
 
 TriangleMesh::TriangleMesh(bool smooth_):
-    BaseObject(), kEpsilon(0.0001), smooth(smooth_),
-	tree_ptr(new SAHKDTree())
+    BaseObject(),tree_ptr(new SAHKDTree()), kEpsilon(0.0001), smooth(smooth_)
 {
 	bBox = BBox();
 	x_min = y_min = z_min =  10000;
@@ -16,10 +15,10 @@ TriangleMesh::~TriangleMesh()
 {
 	vertices.clear();
 	normals.clear();
-	for (int i = 0; i < materials.size(); ++i)
+	for (size_t i = 0; i < materials.size(); ++i)
 		materials[i].reset();
 	materials.clear();
-	for (int i = 0; i < triangles.size(); ++i)
+	for (size_t i = 0; i < triangles.size(); ++i)
 		triangles[i].reset();
 	triangles.clear();
 }
@@ -164,7 +163,7 @@ bool TriangleMesh::hitFace(size_t v0_, size_t v1_, size_t v2_, const Ray &ray,
 
 void TriangleMesh::shift(const Vector3 &v)
 {
-	for(int i = 0; i != vertices.size(); ++i)
+	for(size_t i = 0; i != vertices.size(); ++i)
 		vertices[i] = vertices[i] + v;
 }
 
@@ -205,10 +204,10 @@ void TriangleMesh::addFace(size_t v0, size_t v1, size_t v2, size_t material_inde
 std::string TriangleMesh::toString() const
 {
 	std::ostringstream strs;
-	for(int i = 0; i < vertices.size(); ++i)
+	for(size_t i = 0; i < vertices.size(); ++i)
 		strs<<"["<<i<<vertices[i].toString()<<"]"<<std::endl;
 	strs<<std::endl;
-	for(int i = 0; i < triangles.size(); ++i){
+	for(size_t i = 0; i < triangles.size(); ++i){
 	    strs<<"("<<boost::static_pointer_cast<Triangle>(triangles[i])->v0<<
 		      ", "<<boost::static_pointer_cast<Triangle>(triangles[i])->v1<<
 		      ", "<<boost::static_pointer_cast<Triangle>(triangles[i])->v2<<")"<<std::endl;

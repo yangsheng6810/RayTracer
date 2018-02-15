@@ -17,8 +17,8 @@ public:
 	Point3 hitPoint;
 	Vector3 normal;
 
-    Material m;
 	bool inside;
+    Material m;
 };
 
 #endif // SHADEPACKET_H

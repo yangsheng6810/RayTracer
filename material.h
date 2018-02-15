@@ -23,10 +23,10 @@ public:
 
 	Color diffuse_color, specular_color;
 	double diffuse_intensity, specular_intensity, hardness;
-	bool transparent;
 	bool reflect;
-	bool isLight;
+	bool transparent;
 	Color emission;
+	bool isLight;
 };
 
 #endif // MATERIAL_H

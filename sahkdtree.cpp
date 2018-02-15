@@ -13,7 +13,7 @@ SAHKDTree::SAHKDTree()
 SAHKDTree::~SAHKDTree()
 {
 	m_nodes.clear();
-	for(int i = 0; i < m_leafData.size(); ++i)
+	for(size_t i = 0; i < m_leafData.size(); ++i)
 		m_leafData[i].reset();
 	m_leafData.clear();
 }
@@ -25,7 +25,7 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 	BuildState curState;
 	curState.objects.reset(new std::vector<size_t>);
 	sceneBox = BBox();
-	for(int i = 0; i < objects.size(); ++i)
+	for(size_t i = 0; i < objects.size(); ++i)
 		objectBBoxes[i] = BBox();
 
 	for(size_t i = 0; i < objectBBoxes.size(); ++i){
@@ -62,7 +62,7 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 
 			m_nodes[curState.nodeIndex].dataIndex =
 			        m_leafData.size() | NODE_TYPE_MASK;
-			for(int i = 0; i < curState.objects->size(); ++i){
+			for(size_t i = 0; i < curState.objects->size(); ++i){
 				m_leafData.push_back(objects[(*curState.objects)[i]]);
 			}
 			// delete curState.objects;
@@ -91,7 +91,7 @@ void SAHKDTree::build(const std::vector<boost::shared_ptr<BaseObject> > &objects
 		++curState.depth;
 		rightState.depth = curState.depth;
 
-		for (int i = 0; i < curState.objects->size(); ++i){
+		for (size_t i = 0; i < curState.objects->size(); ++i){
 			size_t objectIndex = (*curState.objects)[i];
 			BBox objectBox = objectBBoxes[objectIndex];
 			if (objectBox.min[splitDim] == splitVal &&
@@ -294,7 +294,7 @@ SAHKDTree::KDPlane SAHKDTree::findPlane
         //New event list for each branch.
         eventList.clear();
 
-        for(int i = 0; i < objects_->size(); i++)
+        for(size_t i = 0; i < objects_->size(); i++)
         {
             BBox triBox = triBoxes[(*objects_)[i]];
             float triMin = std::max(triBox.min[k], volume.min[k]);
@@ -327,7 +327,7 @@ SAHKDTree::KDPlane SAHKDTree::findPlane
         float PXi;
 
         //Based on the list, we find the best splitting plane.
-        int i = 0;
+        size_t i = 0;
         while(i < eventList.size()) {
             PPlus = 0; PMinus = 0; PPlanar = 0;
             //Current cost value.
